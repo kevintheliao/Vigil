@@ -1,0 +1,40 @@
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Gradle build artifacts
+*.apk
+*.aar
+*.jar
+build/
+/app/build/
+
+# Android Studio and local machine configuration
+.gradle/
+local.properties
+.idea/
+*.iml
+.DS_Store
+
+# CRITICAL: AI Models (They are too heavy for Git)
+*.onnx
+*.tflite
+*.bin
+/app/src/main/assets/models/
+
+# CRITICAL: Security keys & API credentials
+*secrets.xml
+*keys.properties
+.env
