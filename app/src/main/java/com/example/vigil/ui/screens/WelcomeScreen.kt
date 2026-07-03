@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,11 +26,12 @@ fun WelcomeScreen(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         VigilWordmark(Modifier.align(Alignment.Start).padding(top = 8.dp))
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(32.dp))
         ShieldEmblem(size = 220)
         Spacer(Modifier.height(40.dp))
         Text(
@@ -45,7 +48,7 @@ fun WelcomeScreen(modifier: Modifier = Modifier) {
             textAlign = TextAlign.Center,
             lineHeight = 24.sp
         )
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(32.dp))
     }
 }
 

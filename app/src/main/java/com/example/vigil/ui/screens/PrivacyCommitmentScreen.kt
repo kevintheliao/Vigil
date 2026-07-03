@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
@@ -36,11 +38,12 @@ fun PrivacyCommitmentScreen(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         VigilWordmark(Modifier.align(Alignment.Start).padding(top = 8.dp))
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(24.dp))
         Box(
             Modifier.size(96.dp).background(VigilPrimaryFixed.copy(alpha = 0.5f), CircleShape),
             contentAlignment = Alignment.Center
@@ -71,7 +74,7 @@ fun PrivacyCommitmentScreen(modifier: Modifier = Modifier) {
             FeatureRow(Icons.Filled.Refresh, "End-to-End Vigilance", "Encryption keys are managed by you. We cannot see what the AI sees.")
         }
 
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(24.dp))
     }
 }
 
