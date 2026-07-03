@@ -40,7 +40,13 @@ import com.example.vigil.ui.theme.VigilTheme
 
 /** Home tab — detection status + recent logs. */
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
+fun HomeScreen(
+    modifier: Modifier = Modifier,
+    permissionGranted: Boolean = true,
+    onRequestPermission: () -> Unit = {}
+) {
+    val statusTint = if (permissionGranted) VigilPrimary else MaterialTheme.colorScheme.error
+    val haloTint = if (permissionGranted) VigilPrimaryFixed else MaterialTheme.colorScheme.error
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -52,21 +58,21 @@ fun HomeScreen(modifier: Modifier = Modifier) {
 
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             Box(
-                Modifier.size(200.dp).background(VigilPrimaryFixed.copy(alpha = 0.35f), CircleShape),
+                Modifier.size(200.dp).background(haloTint.copy(alpha = 0.5f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Box(
                     Modifier.size(96.dp).background(MaterialTheme.colorScheme.surfaceContainerLowest, RoundedCornerShape(24.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = VigilPrimary, modifier = Modifier.size(48.dp))
+                    Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = statusTint, modifier = Modifier.size(48.dp))
                 }
             }
         }
 
         Spacer(Modifier.height(24.dp))
         Text(
-            "Detection is ready",
+            if (permissionGranted) "Detection is ready" else "Detection is not ready",
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
@@ -75,13 +81,22 @@ fun HomeScreen(modifier: Modifier = Modifier) {
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            "Vigil AI is actively monitoring your device for potential threats.",
+            if (permissionGranted) {
+                "Vigil AI is actively monitoring your device for potential threats."
+            } else {
+                "Vigil AI needs SMS permission to monitor your device for potential threats."
+            },
             fontSize = 16.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
             lineHeight = 24.sp,
             modifier = Modifier.fillMaxWidth()
         )
+
+        if (!permissionGranted) {
+            Spacer(Modifier.height(20.dp))
+            VigilPrimaryButton(text = "Allow Permissions", onClick = onRequestPermission, showArrow = false)
+        }
 
         Spacer(Modifier.height(40.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {

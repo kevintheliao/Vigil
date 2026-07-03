@@ -1,5 +1,15 @@
 package com.example.vigil.ui.screens
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -36,33 +46,60 @@ private enum class Flow { Welcome, Overview, Facts, Privacy, Permissions, Main }
 @Composable
 fun VigilApp(modifier: Modifier = Modifier) {
     var step by remember { mutableStateOf(Flow.Welcome) }
+    var smsPermissionGranted by remember { mutableStateOf(true) }
+    val smsPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        smsPermissionGranted = granted
+        step = Flow.Main
+    }
     Box(modifier.fillMaxSize()) {
-        when (step) {
-            Flow.Welcome -> OnboardScaffold("Get Started", { step = Flow.Overview }) { WelcomeScreen() }
-            Flow.Overview -> OnboardScaffold("Continue", { step = Flow.Facts }) { ProtectionOverviewScreen() }
-            Flow.Facts -> OnboardScaffold("Continue", { step = Flow.Privacy }) { SafetyFactsScreen() }
-            Flow.Privacy -> OnboardScaffold(
-                "Next",
-                { step = Flow.Permissions },
-                secondary = {
-                    Text(
-                        "By tapping Next, you acknowledge our commitment to your digital sovereignty.",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
-                    )
+        AnimatedContent(
+            targetState = step,
+            transitionSpec = {
+                val forward = targetState.ordinal >= initialState.ordinal
+                val slideDir = if (forward) {
+                    AnimatedContentTransitionScope.SlideDirection.Left
+                } else {
+                    AnimatedContentTransitionScope.SlideDirection.Right
                 }
-            ) { PrivacyCommitmentScreen() }
-            Flow.Permissions -> OnboardScaffold(
-                "Enable & Continue",
-                { step = Flow.Main },
-                secondary = {
-                    TextButton(onClick = {}) {
-                        Text("Learn how we handle data", color = VigilPrimary, fontWeight = FontWeight.SemiBold)
+                slideIntoContainer(slideDir, animationSpec = tween(350, easing = FastOutSlowInEasing)) +
+                    fadeIn(animationSpec = tween(250, delayMillis = 90)) togetherWith
+                    slideOutOfContainer(slideDir, animationSpec = tween(350, easing = FastOutSlowInEasing)) +
+                    fadeOut(animationSpec = tween(90))
+            },
+            label = "onboarding-transition"
+        ) { animatedStep ->
+            when (animatedStep) {
+                Flow.Welcome -> OnboardScaffold("Get Started", { step = Flow.Overview }) { WelcomeScreen() }
+                Flow.Overview -> OnboardScaffold("Continue", { step = Flow.Facts }) { ProtectionOverviewScreen() }
+                Flow.Facts -> OnboardScaffold("Continue", { step = Flow.Privacy }) { SafetyFactsScreen() }
+                Flow.Privacy -> OnboardScaffold(
+                    "Next",
+                    { step = Flow.Permissions },
+                    secondary = {
+                        Text(
+                            "By tapping Next, you acknowledge our commitment to your digital sovereignty.",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
                     }
-                }
-            ) { PermissionsScreen() }
-            Flow.Main -> MainShell()
+                ) { PrivacyCommitmentScreen() }
+                Flow.Permissions -> OnboardScaffold(
+                    "Enable & Continue",
+                    { smsPermissionLauncher.launch(Manifest.permission.READ_SMS) },
+                    secondary = {
+                        TextButton(onClick = {}) {
+                            Text("Learn how we handle data", color = VigilPrimary, fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+                ) { PermissionsScreen() }
+                Flow.Main -> MainShell(
+                    permissionGranted = smsPermissionGranted,
+                    onRequestPermission = { smsPermissionLauncher.launch(Manifest.permission.READ_SMS) }
+                )
+            }
         }
     }
 }
@@ -99,7 +136,7 @@ private fun OnboardScaffold(
 private enum class Tab { Home, Education }
 
 @Composable
-private fun MainShell() {
+private fun MainShell(permissionGranted: Boolean, onRequestPermission: () -> Unit) {
     var tab by remember { mutableStateOf(Tab.Home) }
     Scaffold(
         bottomBar = {
@@ -121,7 +158,7 @@ private fun MainShell() {
     ) { pad ->
         val inner = Modifier.fillMaxSize().padding(pad)
         when (tab) {
-            Tab.Home -> HomeScreen(inner)
+            Tab.Home -> HomeScreen(inner, permissionGranted, onRequestPermission)
             Tab.Education -> EducationScreen(inner)
         }
     }

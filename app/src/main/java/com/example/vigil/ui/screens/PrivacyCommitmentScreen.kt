@@ -70,8 +70,7 @@ fun PrivacyCommitmentScreen(modifier: Modifier = Modifier) {
 
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             FeatureRow(Icons.Filled.Info, "On-Device AI", "Neural processing happens exclusively in your hardware's secure enclave.")
-            FeatureRow(Icons.Filled.Lock, "Zero-Cloud Storage", "No logs, no metadata, and no data packets ever leave your secure perimeter.")
-            FeatureRow(Icons.Filled.Refresh, "End-to-End Vigilance", "Encryption keys are managed by you. We cannot see what the AI sees.")
+            FeatureRow(Icons.Filled.Lock, "Zero-Cloud Storage", "No logs, no metadata, and no data packets ever leave your phone.")
         }
 
         Spacer(Modifier.height(24.dp))
