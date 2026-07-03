@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,6 +30,7 @@ fun SafetyFactsScreen(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -70,7 +73,7 @@ fun SafetyFactsScreen(modifier: Modifier = Modifier) {
             StatCard("Billions", "Annual Scam Losses", Modifier.weight(1f))
             StatCard("60s", "A new threat born", Modifier.weight(1f))
         }
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(24.dp))
     }
 }
 

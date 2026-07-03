@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Lock
@@ -27,11 +29,12 @@ fun PermissionsScreen(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         VigilWordmark(Modifier.align(Alignment.Start).padding(top = 8.dp))
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(24.dp))
         ShieldEmblem(size = 170)
         Spacer(Modifier.height(32.dp))
         Text(
@@ -55,7 +58,7 @@ fun PermissionsScreen(modifier: Modifier = Modifier) {
             FeatureRow(Icons.Filled.DateRange, "Real-time Analysis", "Instant alerts when a malicious link or phishing attempt is detected in a text.")
         }
 
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(24.dp))
     }
 }
 
