@@ -1,0 +1,144 @@
+package com.example.vigil.ui.screens
+
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import com.example.sentinel.R
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.vigil.ui.theme.VigilPrimary
+import com.example.vigil.ui.theme.VigilPrimaryContainer
+import com.example.vigil.ui.theme.VigilPrimaryFixed
+
+/** Wordmark: the Vigil logo (shield + name baked in). */
+@Composable
+fun VigilWordmark(modifier: Modifier = Modifier) {
+    Image(
+        painter = painterResource(id = R.drawable.vigil_logo),
+        contentDescription = "Vigil",
+        modifier = modifier.size(40.dp)
+    )
+}
+
+/** Circular brand emblem — concentric halo + shield check. */
+@Composable
+fun ShieldEmblem(size: Int = 180, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .size(size.dp)
+            .background(VigilPrimaryFixed.copy(alpha = 0.4f), CircleShape),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size((size * 0.42f).dp)
+                .background(VigilPrimary, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Filled.CheckCircle,
+                contentDescription = null,
+                tint = androidx.compose.ui.graphics.Color.White,
+                modifier = Modifier.size((size * 0.22f).dp)
+            )
+        }
+    }
+}
+
+/** Solid primary button with optional trailing arrow. */
+@Composable
+fun VigilPrimaryButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    showArrow: Boolean = true
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = VigilPrimary)
+    ) {
+        Text(text, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+        if (showArrow) {
+            Spacer(Modifier.width(8.dp))
+            Icon(Icons.Filled.ArrowForward, contentDescription = null, modifier = Modifier.size(20.dp))
+        }
+    }
+}
+
+/** Level-1 card: white surface, 1px outline, no shadow. */
+@Composable
+fun VigilCard(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        content()
+    }
+}
+
+/** Feature row: tinted icon tile + title + body. */
+@Composable
+fun FeatureRow(
+    icon: ImageVector,
+    title: String,
+    body: String,
+    modifier: Modifier = Modifier
+) {
+    VigilCard(modifier = modifier) {
+        Row(Modifier.padding(16.dp)) {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .background(VigilPrimaryContainer.copy(alpha = 0.15f), RoundedCornerShape(10.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(icon, contentDescription = null, tint = VigilPrimary, modifier = Modifier.size(24.dp))
+            }
+            Spacer(Modifier.width(16.dp))
+            Column {
+                Text(title, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+                Spacer(Modifier.height(4.dp))
+                Text(body, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 20.sp)
+            }
+        }
+    }
+}
