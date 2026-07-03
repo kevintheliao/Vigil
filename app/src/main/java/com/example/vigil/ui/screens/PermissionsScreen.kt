@@ -11,7 +11,6 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,16 +19,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.vigil.ui.theme.VigilPrimary
 import com.example.vigil.ui.theme.VigilTheme
 
 /** Permission grant — "Enable Protection". */
 @Composable
-fun PermissionsScreen(
-    onEnable: () -> Unit = {},
-    onLearnMore: () -> Unit = {},
-    modifier: Modifier = Modifier
-) {
+fun PermissionsScreen(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -62,10 +56,6 @@ fun PermissionsScreen(
         }
 
         Spacer(Modifier.weight(1f))
-        VigilPrimaryButton(text = "Enable & Continue", onClick = onEnable)
-        TextButton(onClick = onLearnMore) {
-            Text("Learn how we handle data", color = VigilPrimary, fontWeight = FontWeight.SemiBold)
-        }
     }
 }
 

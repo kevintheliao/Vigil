@@ -20,10 +20,7 @@ import com.example.vigil.ui.theme.VigilTheme
 
 /** Splash / first-run welcome. */
 @Composable
-fun WelcomeScreen(
-    onGetStarted: () -> Unit = {},
-    modifier: Modifier = Modifier
-) {
+fun WelcomeScreen(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -49,7 +46,6 @@ fun WelcomeScreen(
             lineHeight = 24.sp
         )
         Spacer(Modifier.weight(1f))
-        VigilPrimaryButton(text = "Get Started", onClick = onGetStarted)
     }
 }
 

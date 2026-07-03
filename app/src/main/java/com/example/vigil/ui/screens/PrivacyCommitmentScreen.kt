@@ -32,10 +32,7 @@ import com.example.vigil.ui.theme.VigilTheme
 
 /** Onboarding — "Your Privacy is Absolute". */
 @Composable
-fun PrivacyCommitmentScreen(
-    onNext: () -> Unit = {},
-    modifier: Modifier = Modifier
-) {
+fun PrivacyCommitmentScreen(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -75,14 +72,6 @@ fun PrivacyCommitmentScreen(
         }
 
         Spacer(Modifier.weight(1f))
-        VigilPrimaryButton(text = "Next", onClick = onNext)
-        Spacer(Modifier.height(12.dp))
-        Text(
-            "By tapping Next, you acknowledge our commitment to your digital sovereignty.",
-            fontSize = 12.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
     }
 }
 
