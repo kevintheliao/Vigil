@@ -2,4 +2,6 @@
 <resources>
 
     <style name="Theme.Sentinel" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.Vigil" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>
