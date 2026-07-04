@@ -40,7 +40,8 @@ fun PrivacyCommitmentScreen(modifier: Modifier = Modifier) {
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Box(
             Modifier.size(96.dp).background(VigilPrimaryFixed.copy(alpha = 0.5f), CircleShape),
