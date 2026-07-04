@@ -42,8 +42,6 @@ fun PrivacyCommitmentScreen(modifier: Modifier = Modifier) {
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        VigilWordmark(Modifier.align(Alignment.Start).padding(top = 8.dp))
-        Spacer(Modifier.height(24.dp))
         Box(
             Modifier.size(96.dp).background(VigilPrimaryFixed.copy(alpha = 0.5f), CircleShape),
             contentAlignment = Alignment.Center
