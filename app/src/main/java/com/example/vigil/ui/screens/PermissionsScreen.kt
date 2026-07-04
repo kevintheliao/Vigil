@@ -30,33 +30,32 @@ fun PermissionsScreen(modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(horizontal = 24.dp, vertical = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        ShieldEmblem(size = 170)
-        Spacer(Modifier.height(32.dp))
+        ShieldEmblem(size = 120)
+        Spacer(Modifier.height(16.dp))
         Text(
             "Enable Protection",
-            fontSize = 32.sp,
+            fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
         )
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(12.dp))
         Text(
             "To detect threats in real-time, Vigil needs permission to monitor your incoming messages. Your data remains private and on-device.",
-            fontSize = 16.sp,
+            fontSize = 15.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
-            lineHeight = 24.sp
+            lineHeight = 21.sp
         )
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(16.dp))
 
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             FeatureRow(Icons.Filled.Lock, "Privacy First", "AI processing happens entirely on your phone. No messages ever leave your device.")
             FeatureRow(Icons.Filled.DateRange, "Real-time Analysis", "Instant alerts when a malicious link or phishing attempt is detected in a text.")
         }
-
-        Spacer(Modifier.height(24.dp))
     }
 }
 
