@@ -120,7 +120,7 @@ private fun OnboardScaffold(
     Scaffold(
         bottomBar = {
             Column(
-                Modifier.fillMaxWidth().padding(24.dp),
+                Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 40.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (secondary != null) {
