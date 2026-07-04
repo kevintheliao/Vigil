@@ -1,13 +1,11 @@
 package com.example.vigil.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -18,7 +16,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -45,7 +42,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import com.example.sentinel.R
@@ -142,9 +143,12 @@ private val scanDemoScenarios = listOf(
 fun MessagesScanDemo(modifier: Modifier = Modifier) {
     var scenarioIndex by remember { mutableStateOf(0) }
     var revealed by remember { mutableStateOf(0) }
-    var scanning by remember { mutableStateOf(false) }
     var flagged by remember { mutableStateOf(false) }
     val scenario = scanDemoScenarios[scenarioIndex]
+
+    var containerCoords by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    var flaggedBubbleCoords by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    var badgeCoords by remember { mutableStateOf<LayoutCoordinates?>(null) }
 
     LaunchedEffect(Unit) {
         var idx = 0
@@ -152,28 +156,20 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
             scenarioIndex = idx
             val messages = scanDemoScenarios[idx].messages
             revealed = 0
-            scanning = false
             flagged = false
+            flaggedBubbleCoords = null
+            badgeCoords = null
             delay(500)
             for (i in messages.indices) {
                 delay(750)
                 revealed = i + 1
             }
-            delay(400)
-            scanning = true
-            delay(1300)
-            scanning = false
+            delay(600)
             flagged = true
-            delay(2800)
+            delay(3200)
             idx = (idx + 1) % scanDemoScenarios.size
         }
     }
-
-    val scanProgress by animateFloatAsState(
-        targetValue = if (scanning) 1f else 0f,
-        animationSpec = tween(durationMillis = 1300, easing = LinearEasing),
-        label = "scan-progress"
-    )
 
     VigilCard(modifier) {
         Column(Modifier.fillMaxWidth()) {
@@ -209,6 +205,7 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
                     .fillMaxWidth()
                     .height(scenario.viewportHeight)
                     .padding(16.dp)
+                    .onGloballyPositioned { containerCoords = it }
             ) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
@@ -223,6 +220,13 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
                             Column {
                                 Box(
                                     modifier = Modifier
+                                        .then(
+                                            if (isLast) {
+                                                Modifier.onGloballyPositioned { flaggedBubbleCoords = it }
+                                            } else {
+                                                Modifier
+                                            }
+                                        )
                                         .background(
                                             if (isLast && flagged) {
                                                 MaterialTheme.colorScheme.errorContainer
@@ -250,14 +254,21 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
                     }
                 }
 
-                if (scanning) {
-                    Box(
-                        Modifier
-                            .fillMaxWidth()
-                            .height(2.dp)
-                            .offset(y = (scanProgress * (scenario.viewportHeight.value - 32)).dp)
-                            .background(VigilPrimary)
-                    )
+                val container = containerCoords
+                val bubble = flaggedBubbleCoords
+                val badge = badgeCoords
+                if (flagged && container?.isAttached == true && bubble?.isAttached == true && badge?.isAttached == true) {
+                    Canvas(Modifier.fillMaxSize()) {
+                        val start = container.localPositionOf(badge, Offset(0f, badge.size.height / 2f))
+                        val end = container.localPositionOf(bubble, Offset(bubble.size.width.toFloat(), 0f))
+                        drawLine(
+                            color = VigilPrimary,
+                            start = start,
+                            end = end,
+                            strokeWidth = 3f,
+                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 8f), 0f)
+                        )
+                    }
                 }
 
                 Box(Modifier.align(Alignment.TopEnd)) {
@@ -267,6 +278,7 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
                     ) {
                         Row(
                             Modifier
+                                .onGloballyPositioned { badgeCoords = it }
                                 .background(MaterialTheme.colorScheme.errorContainer, RoundedCornerShape(20.dp))
                                 .padding(horizontal = 10.dp, vertical = 6.dp),
                             verticalAlignment = Alignment.CenterVertically
