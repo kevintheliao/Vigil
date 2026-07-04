@@ -91,25 +91,66 @@ fun ShieldEmblem(size: Int = 180, modifier: Modifier = Modifier) {
     }
 }
 
-/**
- * Fake "screen recording" of a messaging app receiving mean texts, with Vigil's AI
- * sweeping in to flag the last one as a threat. Loops continuously.
- */
-@Composable
-fun MessagesScanDemo(modifier: Modifier = Modifier) {
-    val messages = remember {
-        listOf(
+private class ScanScenario(
+    val contactName: String,
+    val contactSubtitle: String,
+    val messages: List<String>,
+    val resultLabel: String,
+    val viewportHeight: androidx.compose.ui.unit.Dp,
+    val bodyFontSize: androidx.compose.ui.unit.TextUnit,
+    val bodyLineHeight: androidx.compose.ui.unit.TextUnit
+)
+
+private val scanDemoScenarios = listOf(
+    ScanScenario(
+        contactName = "Unknown",
+        contactSubtitle = "Mobile",
+        messages = listOf(
             "hey",
             "why do you even bother showing up anymore",
             "nobody actually likes you, you know that right"
-        )
-    }
+        ),
+        resultLabel = "Threat detected",
+        viewportHeight = 200.dp,
+        bodyFontSize = 13.sp,
+        bodyLineHeight = 18.sp
+    ),
+    ScanScenario(
+        contactName = "Scammer",
+        contactSubtitle = "Mobile",
+        messages = listOf(
+            "URGENT: Your package delivery has been suspended due to an incorrect " +
+                "shipping address.\n\nTo avoid your package being returned, please " +
+                "confirm your information within the next 30 minutes:\n\n" +
+                "hxxps://track-delivery-check[.]com\n\nFailure to verify today will " +
+                "result in an additional \$4.99 redelivery fee. Reply YES to continue " +
+                "or call (555) 123-4567 for assistance."
+        ),
+        resultLabel = "Scam detected",
+        viewportHeight = 320.dp,
+        bodyFontSize = 12.sp,
+        bodyLineHeight = 17.sp
+    )
+)
+
+/**
+ * Fake "screen recording" of a messaging app receiving threatening texts, with
+ * Vigil's AI sweeping in to flag them. Cycles through a harassment scenario and a
+ * phishing-scam scenario, looping continuously.
+ */
+@Composable
+fun MessagesScanDemo(modifier: Modifier = Modifier) {
+    var scenarioIndex by remember { mutableStateOf(0) }
     var revealed by remember { mutableStateOf(0) }
     var scanning by remember { mutableStateOf(false) }
     var flagged by remember { mutableStateOf(false) }
+    val scenario = scanDemoScenarios[scenarioIndex]
 
     LaunchedEffect(Unit) {
+        var idx = 0
         while (true) {
+            scenarioIndex = idx
+            val messages = scanDemoScenarios[idx].messages
             revealed = 0
             scanning = false
             flagged = false
@@ -124,6 +165,7 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
             scanning = false
             flagged = true
             delay(2800)
+            idx = (idx + 1) % scanDemoScenarios.size
         }
     }
 
@@ -157,27 +199,27 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
                 }
                 Spacer(Modifier.width(10.dp))
                 Column {
-                    Text("Unknown", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
-                    Text("Mobile", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(scenario.contactName, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+                    Text(scenario.contactSubtitle, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
             Box(
                 Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
+                    .height(scenario.viewportHeight)
                     .padding(16.dp)
             ) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Bottom
                 ) {
-                    messages.forEachIndexed { i, text ->
+                    scenario.messages.forEachIndexed { i, text ->
                         AnimatedVisibility(
                             visible = i < revealed,
                             enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 })
                         ) {
-                            val isLast = i == messages.lastIndex
+                            val isLast = i == scenario.messages.lastIndex
                             Column {
                                 Box(
                                     modifier = Modifier
@@ -193,7 +235,8 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
                                 ) {
                                     Text(
                                         text,
-                                        fontSize = 13.sp,
+                                        fontSize = scenario.bodyFontSize,
+                                        lineHeight = scenario.bodyLineHeight,
                                         color = if (isLast && flagged) {
                                             MaterialTheme.colorScheme.onErrorContainer
                                         } else {
@@ -212,7 +255,7 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
                         Modifier
                             .fillMaxWidth()
                             .height(2.dp)
-                            .offset(y = (scanProgress * 168).dp)
+                            .offset(y = (scanProgress * (scenario.viewportHeight.value - 32)).dp)
                             .background(VigilPrimary)
                     )
                 }
@@ -236,7 +279,7 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
                             )
                             Spacer(Modifier.width(4.dp))
                             Text(
-                                "Threat detected",
+                                scenario.resultLabel,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onErrorContainer
