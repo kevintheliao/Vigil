@@ -39,13 +39,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -214,48 +217,53 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
                     .padding(16.dp)
                     .onGloballyPositioned { containerCoords = it }
             ) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Bottom
-                ) {
-                    scenario.messages.forEachIndexed { i, text ->
-                        AnimatedVisibility(
-                            visible = i < revealed,
-                            enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 })
-                        ) {
-                            val isLast = i == scenario.messages.lastIndex
-                            Column {
-                                Box(
-                                    modifier = Modifier
-                                        .then(
-                                            if (isLast) {
-                                                Modifier.onGloballyPositioned { flaggedBubbleCoords = it }
+                // Keyed on the scenario so switching scenarios fully discards the old
+                // bubbles instead of patching their text mid-exit-animation, which used
+                // to flash the next scenario's message inside the old bubble briefly.
+                key(scenarioIndex) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Bottom
+                    ) {
+                        scenario.messages.forEachIndexed { i, text ->
+                            AnimatedVisibility(
+                                visible = i < revealed,
+                                enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 })
+                            ) {
+                                val isLast = i == scenario.messages.lastIndex
+                                Column {
+                                    Box(
+                                        modifier = Modifier
+                                            .then(
+                                                if (isLast) {
+                                                    Modifier.onGloballyPositioned { flaggedBubbleCoords = it }
+                                                } else {
+                                                    Modifier
+                                                }
+                                            )
+                                            .background(
+                                                if (isLast && flagged) {
+                                                    MaterialTheme.colorScheme.errorContainer
+                                                } else {
+                                                    MaterialTheme.colorScheme.surfaceContainer
+                                                },
+                                                RoundedCornerShape(14.dp)
+                                            )
+                                            .padding(horizontal = 14.dp, vertical = 10.dp)
+                                    ) {
+                                        Text(
+                                            text,
+                                            fontSize = scenario.bodyFontSize,
+                                            lineHeight = scenario.bodyLineHeight,
+                                            color = if (isLast && flagged) {
+                                                MaterialTheme.colorScheme.onErrorContainer
                                             } else {
-                                                Modifier
+                                                MaterialTheme.colorScheme.onSurface
                                             }
                                         )
-                                        .background(
-                                            if (isLast && flagged) {
-                                                MaterialTheme.colorScheme.errorContainer
-                                            } else {
-                                                MaterialTheme.colorScheme.surfaceContainer
-                                            },
-                                            RoundedCornerShape(14.dp)
-                                        )
-                                        .padding(horizontal = 14.dp, vertical = 10.dp)
-                                ) {
-                                    Text(
-                                        text,
-                                        fontSize = scenario.bodyFontSize,
-                                        lineHeight = scenario.bodyLineHeight,
-                                        color = if (isLast && flagged) {
-                                            MaterialTheme.colorScheme.onErrorContainer
-                                        } else {
-                                            MaterialTheme.colorScheme.onSurface
-                                        }
-                                    )
+                                    }
+                                    Spacer(Modifier.height(8.dp))
                                 }
-                                Spacer(Modifier.height(8.dp))
                             }
                         }
                     }
@@ -266,43 +274,66 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
                 val badge = badgeCoords
                 if (flagged && container?.isAttached == true && bubble?.isAttached == true && badge?.isAttached == true) {
                     Canvas(Modifier.fillMaxSize()) {
-                        val start = container.localPositionOf(badge, Offset(0f, badge.size.height / 2f))
+                        val start = container.localPositionOf(badge, Offset(badge.size.width / 2f, badge.size.height.toFloat()))
                         val end = container.localPositionOf(bubble, Offset(bubble.size.width.toFloat(), 0f))
-                        drawLine(
+
+                        // Right-angle elbow connector, routed down the right margin (where
+                        // left-anchored bubbles never reach) instead of cutting a diagonal
+                        // across the other messages.
+                        val rightEdge = size.width - 8.dp.toPx()
+                        val cornerX = maxOf(start.x, end.x).coerceAtMost(rightEdge)
+                        val cornerRadius = 10.dp.toPx()
+                            .coerceAtMost(kotlin.math.abs(end.y - start.y) / 2f)
+                            .coerceAtMost(kotlin.math.abs(cornerX - start.x) / 2f)
+                            .coerceAtMost(kotlin.math.abs(cornerX - end.x) / 2f)
+                            .coerceAtLeast(0f)
+
+                        val path = Path().apply {
+                            moveTo(start.x, start.y)
+                            lineTo(cornerX - cornerRadius, start.y)
+                            quadraticTo(cornerX, start.y, cornerX, start.y + cornerRadius * (if (end.y > start.y) 1f else -1f))
+                            lineTo(cornerX, end.y - cornerRadius * (if (end.y > start.y) 1f else -1f))
+                            quadraticTo(cornerX, end.y, cornerX - cornerRadius, end.y)
+                            lineTo(end.x, end.y)
+                        }
+                        drawPath(
+                            path = path,
                             color = VigilPrimary,
-                            start = start,
-                            end = end,
-                            strokeWidth = 3f,
-                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 8f), 0f)
+                            style = Stroke(
+                                width = 3f,
+                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 8f), 0f)
+                            )
                         )
                     }
                 }
 
                 Box(Modifier.align(Alignment.TopEnd)) {
-                    androidx.compose.animation.AnimatedVisibility(
-                        visible = flagged,
-                        enter = scaleIn() + fadeIn()
-                    ) {
-                        Row(
-                            Modifier
-                                .onGloballyPositioned { badgeCoords = it }
-                                .background(MaterialTheme.colorScheme.errorContainer, RoundedCornerShape(20.dp))
-                                .padding(horizontal = 10.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                    key(scenarioIndex) {
+                        androidx.compose.animation.AnimatedVisibility(
+                            visible = flagged,
+                            enter = scaleIn() + fadeIn()
                         ) {
-                            Icon(
-                                Icons.Filled.Warning,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onErrorContainer,
-                                modifier = Modifier.size(14.dp)
-                            )
-                            Spacer(Modifier.width(4.dp))
-                            Text(
-                                scenario.resultLabel,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onErrorContainer
-                            )
+                            Row(
+                                Modifier
+                                    .onGloballyPositioned { badgeCoords = it }
+                                    .background(MaterialTheme.colorScheme.errorContainer, RoundedCornerShape(20.dp))
+                                    .padding(horizontal = 10.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Filled.Warning,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onErrorContainer,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(Modifier.width(4.dp))
+                                Text(
+                                    scenario.resultLabel,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                            }
                         }
                     }
                 }
