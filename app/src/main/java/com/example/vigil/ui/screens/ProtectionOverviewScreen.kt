@@ -42,7 +42,7 @@ fun ProtectionOverviewScreen(modifier: Modifier = Modifier) {
         )
         Spacer(Modifier.height(16.dp))
         Text(
-            "Vigil's AI monitors threats in real-time, preventing losses before they reach your doorstep.",
+            "Vigil's AI monitors in real-time, notifying you immediately when something harmful is sent.",
             fontSize = 16.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
