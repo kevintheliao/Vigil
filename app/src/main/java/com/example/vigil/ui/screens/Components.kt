@@ -1,6 +1,8 @@
 package com.example.vigil.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.slideInVertically
@@ -145,6 +147,11 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
     var revealed by remember { mutableStateOf(0) }
     var flagged by remember { mutableStateOf(false) }
     val scenario = scanDemoScenarios[scenarioIndex]
+    val viewportHeight by animateDpAsState(
+        targetValue = scenario.viewportHeight,
+        animationSpec = tween(durationMillis = 500),
+        label = "viewport-height"
+    )
 
     var containerCoords by remember { mutableStateOf<LayoutCoordinates?>(null) }
     var flaggedBubbleCoords by remember { mutableStateOf<LayoutCoordinates?>(null) }
@@ -203,7 +210,7 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
             Box(
                 Modifier
                     .fillMaxWidth()
-                    .height(scenario.viewportHeight)
+                    .height(viewportHeight)
                     .padding(16.dp)
                     .onGloballyPositioned { containerCoords = it }
             ) {
