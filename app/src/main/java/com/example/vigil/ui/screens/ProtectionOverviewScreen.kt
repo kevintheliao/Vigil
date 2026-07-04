@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -31,8 +32,8 @@ fun ProtectionOverviewScreen(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        ShieldEmblem(size = 220)
-        Spacer(Modifier.height(40.dp))
+        MessagesScanDemo(Modifier.fillMaxWidth())
+        Spacer(Modifier.height(32.dp))
         Text(
             "Proactive Vigilance",
             fontSize = 24.sp,
