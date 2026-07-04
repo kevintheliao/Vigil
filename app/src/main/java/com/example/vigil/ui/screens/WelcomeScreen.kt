@@ -30,8 +30,6 @@ fun WelcomeScreen(modifier: Modifier = Modifier) {
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        VigilWordmark(Modifier.align(Alignment.Start).padding(top = 8.dp))
-        Spacer(Modifier.height(32.dp))
         ShieldEmblem(size = 220)
         Spacer(Modifier.height(40.dp))
         Text(

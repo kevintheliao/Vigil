@@ -33,8 +33,6 @@ fun PermissionsScreen(modifier: Modifier = Modifier) {
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        VigilWordmark(Modifier.align(Alignment.Start).padding(top = 8.dp))
-        Spacer(Modifier.height(24.dp))
         ShieldEmblem(size = 170)
         Spacer(Modifier.height(32.dp))
         Text(
