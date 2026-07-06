@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,7 +32,7 @@ fun SafetyFactsScreen(modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(24.dp),
+            .padding(horizontal = 24.dp, vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -41,24 +42,17 @@ fun SafetyFactsScreen(modifier: Modifier = Modifier) {
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
         )
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(16.dp))
 
         VigilCard {
             Column(
-                Modifier.fillMaxWidth().padding(24.dp),
+                Modifier.fillMaxWidth().padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("40%", fontSize = 44.sp, fontWeight = FontWeight.Bold, color = VigilPrimary)
-                Text(
-                    "ADULT PREVALENCE",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = 1.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Text("1 in 3", fontSize = 44.sp, fontWeight = FontWeight.Bold, color = VigilPrimary)
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    "of adults have experienced harassment or privacy breaches online.",
+                    "teens have been cyberbullied at some point in their lives.",
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -69,21 +63,67 @@ fun SafetyFactsScreen(modifier: Modifier = Modifier) {
 
         Spacer(Modifier.height(16.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            StatCard("Billions", "Annual Scam Losses", Modifier.weight(1f))
-            StatCard("60s", "A new threat born", Modifier.weight(1f))
+            StatCard("$470 Million", "in annual losses to text scams", Modifier.weight(1f))
+            StatCard("46%", "of teens have experienced cyberbullying", Modifier.weight(1f))
         }
+
         Spacer(Modifier.height(24.dp))
+        Text(
+            "Vigil can help",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            "Vigil watches for scams and bullying in real time, so you hear about " +
+                "harmful messages the moment they arrive.",
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            lineHeight = 20.sp
+        )
     }
 }
 
 @Composable
 private fun StatCard(value: String, label: String, modifier: Modifier = Modifier) {
     VigilCard(modifier) {
-        Column(Modifier.padding(16.dp).height(96.dp), verticalArrangement = Arrangement.Bottom) {
-            Text(value, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-            Text(label, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Column(
+            Modifier.padding(16.dp).height(96.dp).fillMaxWidth(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                value,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = VigilPrimary,
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                label,
+                fontSize = 11.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
         }
     }
+}
+
+/** Citation footer for the stats above — rendered by the onboarding scaffold
+ *  just above the Continue button. */
+@Composable
+fun SafetyFactsSources(modifier: Modifier = Modifier) {
+    Text(
+        "Sources: UNICEF (2019) · FTC (2025) · Pew Research Center (2022)",
+        modifier = modifier,
+        fontSize = 10.sp,
+        fontStyle = FontStyle.Italic,
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+        textAlign = TextAlign.Center
+    )
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFFF7F9FB)

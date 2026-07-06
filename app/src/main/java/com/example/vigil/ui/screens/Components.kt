@@ -28,7 +28,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -55,6 +54,9 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import com.example.sentinel.R
+import com.example.vigil.detection.DetectionIndicatorChip
+import com.example.vigil.detection.DetectionUiState
+import com.example.vigil.detection.Severity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.vigil.ui.theme.VigilPrimary
@@ -149,6 +151,7 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
     var scenarioIndex by remember { mutableStateOf(0) }
     var revealed by remember { mutableStateOf(0) }
     var flagged by remember { mutableStateOf(false) }
+    var riskScore by remember { mutableStateOf(0) }
     val scenario = scanDemoScenarios[scenarioIndex]
     val viewportHeight by animateDpAsState(
         targetValue = scenario.viewportHeight,
@@ -175,6 +178,7 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
                 revealed = i + 1
             }
             delay(600)
+            riskScore = (60..99).random()
             flagged = true
             delay(3200)
             idx = (idx + 1) % scanDemoScenarios.size
@@ -313,27 +317,15 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
                             visible = flagged,
                             enter = scaleIn() + fadeIn()
                         ) {
-                            Row(
-                                Modifier
-                                    .onGloballyPositioned { badgeCoords = it }
-                                    .background(MaterialTheme.colorScheme.errorContainer, RoundedCornerShape(20.dp))
-                                    .padding(horizontal = 10.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    Icons.Filled.Warning,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onErrorContainer,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Spacer(Modifier.width(4.dp))
-                                Text(
-                                    scenario.resultLabel,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.onErrorContainer
-                                )
-                            }
+                            DetectionIndicatorChip(
+                                state = DetectionUiState(
+                                    severity = Severity.HIGH,
+                                    message = scenario.resultLabel,
+                                    riskScore = riskScore
+                                ),
+                                onTap = {},
+                                modifier = Modifier.onGloballyPositioned { badgeCoords = it }
+                            )
                         }
                     }
                 }
