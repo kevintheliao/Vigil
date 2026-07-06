@@ -1,6 +1,8 @@
 package com.example.vigil.ui.screens
 
 import android.Manifest
+import android.content.Intent
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
@@ -34,23 +36,33 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import com.example.vigil.ui.theme.VigilPrimary
 
 /** Onboarding step order, then the tabbed main shell. */
-private enum class Flow { Welcome, Overview, Facts, Privacy, Permissions, Main }
+private enum class Flow { Welcome, Overview, Facts, Privacy, Permissions, OverlayPermission, Main }
 
 @Composable
 fun VigilApp(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
     var step by remember { mutableStateOf(Flow.Welcome) }
     var smsPermissionGranted by remember { mutableStateOf(true) }
     val smsPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         smsPermissionGranted = granted
+        step = Flow.OverlayPermission
+    }
+    // "Display over other apps" has no runtime dialog — it's a Settings toggle,
+    // so we launch the Settings page and move on when the user comes back.
+    val overlayPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
         step = Flow.Main
     }
     Box(modifier.fillMaxSize()) {
@@ -73,7 +85,11 @@ fun VigilApp(modifier: Modifier = Modifier) {
             when (animatedStep) {
                 Flow.Welcome -> OnboardScaffold("Get Started", { step = Flow.Overview }) { WelcomeScreen() }
                 Flow.Overview -> OnboardScaffold("Continue", { step = Flow.Facts }) { ProtectionOverviewScreen() }
-                Flow.Facts -> OnboardScaffold("Continue", { step = Flow.Privacy }) { SafetyFactsScreen() }
+                Flow.Facts -> OnboardScaffold(
+                    "Continue",
+                    { step = Flow.Privacy },
+                    secondary = { SafetyFactsSources() }
+                ) { SafetyFactsScreen() }
                 Flow.Privacy -> OnboardScaffold(
                     "Next",
                     { step = Flow.Permissions },
@@ -95,6 +111,26 @@ fun VigilApp(modifier: Modifier = Modifier) {
                         }
                     }
                 ) { PermissionsScreen() }
+                Flow.OverlayPermission -> OnboardScaffold(
+                    "Allow & Continue",
+                    {
+                        if (Settings.canDrawOverlays(context)) {
+                            step = Flow.Main
+                        } else {
+                            overlayPermissionLauncher.launch(
+                                Intent(
+                                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                    "package:${context.packageName}".toUri()
+                                )
+                            )
+                        }
+                    },
+                    secondary = {
+                        TextButton(onClick = { step = Flow.Main }) {
+                            Text("Maybe later", color = VigilPrimary, fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+                ) { OverlayPermissionScreen() }
                 Flow.Main -> MainShell(
                     permissionGranted = smsPermissionGranted,
                     onRequestPermission = { smsPermissionLauncher.launch(Manifest.permission.READ_SMS) }
