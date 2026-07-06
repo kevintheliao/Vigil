@@ -57,7 +57,7 @@ fun OverlayPermissionScreen(modifier: Modifier = Modifier) {
             DetectionIndicatorChip(
                 state = DetectionUiState(
                     severity = Severity.HIGH,
-                    message = "High risk: Scam",
+                    message = "High risk",
                     riskScore = 87
                 ),
                 onTap = {}
