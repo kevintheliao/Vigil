@@ -45,7 +45,7 @@ import androidx.core.net.toUri
 import com.example.vigil.ui.theme.VigilPrimary
 
 /** Onboarding step order, then the tabbed main shell. */
-private enum class Flow { Welcome, Overview, Facts, Privacy, Permissions, OverlayPermission, Main }
+private enum class Flow { Welcome, Facts, Overview, Privacy, Permissions, OverlayPermission, Main }
 
 @Composable
 fun VigilApp(modifier: Modifier = Modifier) {
@@ -83,13 +83,13 @@ fun VigilApp(modifier: Modifier = Modifier) {
             label = "onboarding-transition"
         ) { animatedStep ->
             when (animatedStep) {
-                Flow.Welcome -> OnboardScaffold("Get Started", { step = Flow.Overview }) { WelcomeScreen() }
-                Flow.Overview -> OnboardScaffold("Continue", { step = Flow.Facts }) { ProtectionOverviewScreen() }
+                Flow.Welcome -> OnboardScaffold("Get Started", { step = Flow.Facts }) { WelcomeScreen() }
                 Flow.Facts -> OnboardScaffold(
                     "Continue",
-                    { step = Flow.Privacy },
+                    { step = Flow.Overview },
                     secondary = { SafetyFactsSources() }
                 ) { SafetyFactsScreen() }
+                Flow.Overview -> OnboardScaffold("Continue", { step = Flow.Privacy }) { ProtectionOverviewScreen() }
                 Flow.Privacy -> OnboardScaffold(
                     "Next",
                     { step = Flow.Permissions },
