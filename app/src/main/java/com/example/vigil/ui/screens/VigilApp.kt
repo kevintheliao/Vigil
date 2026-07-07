@@ -42,16 +42,30 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
+import com.example.vigil.OnboardingPrefs
 import com.example.vigil.ui.theme.VigilPrimary
 
 /** Onboarding step order, then the tabbed main shell. */
 private enum class Flow { Welcome, Facts, Overview, Privacy, Permissions, OverlayPermission, Main }
 
+// Set to true once onboarding testing is done: returning users then skip straight
+// to Main. Completion is always recorded, so flipping this flag is the only change.
+private const val ONBOARDING_PERSISTENCE_ENABLED = false
+
 @Composable
 fun VigilApp(modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    var step by remember { mutableStateOf(Flow.Welcome) }
+    var step by remember {
+        mutableStateOf(
+            if (ONBOARDING_PERSISTENCE_ENABLED && OnboardingPrefs.isCompleted(context)) Flow.Main
+            else Flow.Welcome
+        )
+    }
     var smsPermissionGranted by remember { mutableStateOf(true) }
+    val completeOnboarding = {
+        OnboardingPrefs.setCompleted(context)
+        step = Flow.Main
+    }
     val smsPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
@@ -63,7 +77,7 @@ fun VigilApp(modifier: Modifier = Modifier) {
     val overlayPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
-        step = Flow.Main
+        completeOnboarding()
     }
     Box(modifier.fillMaxSize()) {
         AnimatedContent(
@@ -115,7 +129,7 @@ fun VigilApp(modifier: Modifier = Modifier) {
                     "Allow & Continue",
                     {
                         if (Settings.canDrawOverlays(context)) {
-                            step = Flow.Main
+                            completeOnboarding()
                         } else {
                             overlayPermissionLauncher.launch(
                                 Intent(
@@ -126,7 +140,7 @@ fun VigilApp(modifier: Modifier = Modifier) {
                         }
                     },
                     secondary = {
-                        TextButton(onClick = { step = Flow.Main }) {
+                        TextButton(onClick = completeOnboarding) {
                             Text("Maybe later", color = VigilPrimary, fontWeight = FontWeight.SemiBold)
                         }
                     }
