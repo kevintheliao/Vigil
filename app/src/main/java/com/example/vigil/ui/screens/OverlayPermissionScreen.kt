@@ -73,7 +73,7 @@ fun OverlayPermissionScreen(modifier: Modifier = Modifier) {
         )
         Spacer(Modifier.height(12.dp))
         Text(
-            "When Vigil spots a dangerous message, it shows a small alert right on top of your messaging app — so you know before you reply. Android calls this permission “Display over other apps”.",
+            "When Vigil spots a dangerous message, it shows a small alert right on top of your messaging app, so you know before you reply. Android calls this permission “Display over other apps”.",
             fontSize = 15.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -85,7 +85,7 @@ fun OverlayPermissionScreen(modifier: Modifier = Modifier) {
             FeatureRow(
                 Icons.Filled.Layers,
                 "Instant Warnings",
-                "A small chip appears over your messages the moment a scam or threat is detected. It disappears on its own."
+                "A small chip appears over your messages the moment a scam or threat is detected."
             )
             FeatureRow(
                 Icons.Filled.TouchApp,
