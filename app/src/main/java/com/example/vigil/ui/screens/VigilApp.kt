@@ -45,11 +45,10 @@ import androidx.core.net.toUri
 import com.example.vigil.OnboardingPrefs
 import com.example.vigil.ui.theme.VigilPrimary
 
-/** Onboarding step order, then the tabbed main shell. */
+// Onboarding step order 
 private enum class Flow { Welcome, Facts, Overview, Privacy, Permissions, OverlayPermission, Main }
 
 // Set to true once onboarding testing is done: returning users then skip straight
-// to Main. Completion is always recorded, so flipping this flag is the only change.
 private const val ONBOARDING_PERSISTENCE_ENABLED = false
 
 @Composable
@@ -67,9 +66,9 @@ fun VigilApp(modifier: Modifier = Modifier) {
         step = Flow.Main
     }
     val smsPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        smsPermissionGranted = granted
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { results ->
+        smsPermissionGranted = results.values.all { it }
         step = Flow.OverlayPermission
     }
     // "Display over other apps" has no runtime dialog — it's a Settings toggle,
@@ -118,7 +117,7 @@ fun VigilApp(modifier: Modifier = Modifier) {
                 ) { PrivacyCommitmentScreen() }
                 Flow.Permissions -> OnboardScaffold(
                     "Enable & Continue",
-                    { smsPermissionLauncher.launch(Manifest.permission.READ_SMS) },
+                    { smsPermissionLauncher.launch(arrayOf(Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS)) },
                     secondary = {
                         TextButton(onClick = {}) {
                             Text("Learn how we handle data", color = VigilPrimary, fontWeight = FontWeight.SemiBold)
@@ -147,7 +146,7 @@ fun VigilApp(modifier: Modifier = Modifier) {
                 ) { OverlayPermissionScreen() }
                 Flow.Main -> MainShell(
                     permissionGranted = smsPermissionGranted,
-                    onRequestPermission = { smsPermissionLauncher.launch(Manifest.permission.READ_SMS) }
+                    onRequestPermission = { smsPermissionLauncher.launch(arrayOf(Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS)) }
                 )
             }
         }
