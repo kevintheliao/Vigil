@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import android.text.format.DateUtils
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,20 +21,27 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.vigil.detection.DetectionLog
+import com.example.vigil.detection.DetectionLogEntry
+import com.example.vigil.detection.MlLabel
 import com.example.vigil.ui.theme.VigilPrimary
 import com.example.vigil.ui.theme.VigilPrimaryFixed
 import com.example.vigil.ui.theme.VigilTheme
@@ -47,6 +55,9 @@ fun HomeScreen(
 ) {
     val statusTint = if (permissionGranted) VigilPrimary else MaterialTheme.colorScheme.error
     val haloTint = if (permissionGranted) VigilPrimaryFixed else MaterialTheme.colorScheme.error
+    val context = LocalContext.current
+    LaunchedEffect(Unit) { DetectionLog.ensureLoaded(context) }
+    val logEntries by DetectionLog.entries.collectAsState()
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -104,12 +115,39 @@ fun HomeScreen(
             Text("View All", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = VigilPrimary)
         }
         Spacer(Modifier.height(12.dp))
-        LogRow(Icons.Filled.CheckCircle, "New App Verified", "2 mins ago • Safe")
+        if (logEntries.isEmpty()) {
+            Text(
+                "No threats detected yet.",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else {
+            logEntries.forEach { entry ->
+                LogRow(
+                    icon = if (entry.label == MlLabel.SAFE) Icons.Filled.CheckCircle else Icons.Filled.Warning,
+                    title = entry.title(),
+                    time = entry.relativeTime(),
+                    subtitle = entry.snippet
+                )
+                Spacer(Modifier.height(12.dp))
+            }
+        }
         Spacer(Modifier.height(12.dp))
-        LogRow(Icons.Filled.DateRange, "Database Updated", "1 hour ago • v2.4.1")
-        Spacer(Modifier.height(24.dp))
     }
 }
+
+private fun DetectionLogEntry.title(): String = when (label) {
+    MlLabel.SAFE -> "Message scanned"
+    MlLabel.SCAM -> "Possible scam"
+    MlLabel.HARASSMENT -> "Possible harassment"
+}
+
+private fun DetectionLogEntry.relativeTime(): String =
+    DateUtils.getRelativeTimeSpanString(
+        timestampMillis,
+        System.currentTimeMillis(),
+        DateUtils.MINUTE_IN_MILLIS
+    ).toString()
 
 @Composable
 private fun HomeTopBar() {
@@ -128,7 +166,7 @@ private fun HomeTopBar() {
 }
 
 @Composable
-private fun LogRow(icon: ImageVector, title: String, subtitle: String) {
+private fun LogRow(icon: ImageVector, title: String, subtitle: String, time: String? = null) {
     VigilCard {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
@@ -139,7 +177,13 @@ private fun LogRow(icon: ImageVector, title: String, subtitle: String) {
             }
             Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
-                Text(title, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(title, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+                    if (time != null) {
+                        Spacer(Modifier.width(6.dp))
+                        Text(time, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
                 Text(subtitle, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
