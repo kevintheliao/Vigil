@@ -13,17 +13,13 @@ from transformers import (
 
 MODEL_DIR = "./model"
 
-#load the fine-tuned model; its config already knows the label names
-#from training, so no need to redefine LABELS/label2id here
+#tokenizer, id2label, label2id
 tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR)
 model = AutoModelForSequenceClassification.from_pretrained(MODEL_DIR)
 id2label = model.config.id2label
 label2id = model.config.label2id
 
-#rebuild the exact same test split used during training. same source
-#file, same SAFE cap, same random_state, same train_test_split call:
-#this must match train.py exactly or we'd accidentally evaluate on
-#rows the model was trained on
+#load and split the data
 df = pd.read_csv("data/combined.csv")
 df["label_id"] = df["label"].map(label2id)
 
@@ -38,8 +34,7 @@ _, test_df = train_test_split(
     df, test_size=0.2, random_state=42, stratify=df["label_id"]
 )
 
-#tokenize the same way as training (truncation only, dynamic padding
-#per batch via the data collator)
+#tokenize, truncation
 def tokenize(batch):
     return tokenizer(batch["text"], truncation=True, max_length=128)
 
@@ -48,8 +43,7 @@ test_ds = test_ds.map(tokenize, batched=True)
 
 data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
-#Trainer here is just used to run batched inference efficiently
-#(handles the MPS device placement automatically); no training happens
+#Trainer
 trainer = Trainer(model=model, data_collator=data_collator)
 predictions = trainer.predict(test_ds)
 
