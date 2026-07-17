@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -39,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
@@ -114,12 +116,12 @@ fun DetectionIndicator(
         onDismissed()
     }
 
-    Box(modifier = modifier, contentAlignment = Alignment.BottomCenter) {
+    Box(modifier = modifier, contentAlignment = Alignment.TopEnd) {
         AnimatedVisibility(
             visible = visible,
-            enter = fadeIn(tween(250)) + slideInVertically(tween(300)) { it / 2 },
+            enter = fadeIn(tween(250)) + slideInVertically(tween(300)) { -it / 2 },
             exit = fadeOut(tween(EXIT_ANIMATION_MILLIS)) +
-                slideOutVertically(tween(EXIT_ANIMATION_MILLIS)) { it / 2 },
+                slideOutVertically(tween(EXIT_ANIMATION_MILLIS)) { -it / 2 },
         ) {
             DetectionIndicatorChip(state = state, onTap = onTap)
         }
@@ -143,11 +145,12 @@ fun DetectionIndicatorChip(
     val chevronColor = if (darkTheme) Color(0xFF8A9097) else Color(0xFF9AA1A9)
 
     Surface(
-        modifier = modifier.height(44.dp),
+        modifier = modifier
+            .height(44.dp)
+            .widthIn(max = 320.dp),
         shape = RoundedCornerShape(22.dp),
         color = containerColor,
         border = BorderStroke(1.dp, borderColor),
-        shadowElevation = 6.dp,
         onClick = onTap,
     ) {
         Row(
@@ -175,6 +178,8 @@ fun DetectionIndicatorChip(
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false),
             )
 
             state.riskScore?.let { score ->
