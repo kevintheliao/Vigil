@@ -94,8 +94,9 @@ class DetectionOverlayService : Service() {
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
             PixelFormat.TRANSLUCENT,
         ).apply {
-            gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
-            y = (24 * resources.displayMetrics.density).toInt()
+            gravity = Gravity.TOP or Gravity.END
+            x = (12 * resources.displayMetrics.density).toInt()
+            y = (112 * resources.displayMetrics.density).toInt()
         }
 
         windowManager.addView(view, params)
