@@ -1,11 +1,15 @@
 package com.example.vigil.detection
 
+import android.app.AppOpsManager
 import android.app.Service
+import android.app.usage.UsageEvents
+import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.IBinder
 import android.provider.Settings
+import android.provider.Telephony
 import android.view.Gravity
 import android.view.WindowManager
 import androidx.compose.runtime.getValue
@@ -51,7 +55,7 @@ class DetectionOverlayService : Service() {
         when (intent?.action) {
             ACTION_SHOW -> {
                 val state = intent.toDetectionUiState()
-                if (state != null && Settings.canDrawOverlays(this)) {
+                if (state != null && Settings.canDrawOverlays(this) && smsAppIsForeground()) {
                     uiState = state
                     if (overlayView == null) attachOverlay()
                 } else {
@@ -65,6 +69,31 @@ class DetectionOverlayService : Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    /**
+     * True when the user's default SMS app is the foreground app, so the chip
+     * only appears over the messaging conversation it belongs to.
+     *
+     * Requires the Usage Access special permission (a Settings toggle). Without
+     * it the foreground app is unknowable, so we fall back to showing the chip
+     * everywhere rather than silently never showing it.
+     */
+    private fun smsAppIsForeground(): Boolean {
+        if (!hasUsageAccess(this)) return true
+
+        val usageStats = getSystemService(USAGE_STATS_SERVICE) as UsageStatsManager
+        val now = System.currentTimeMillis()
+        val events = usageStats.queryEvents(now - 60_000, now)
+        var lastForeground: String? = null
+        val event = UsageEvents.Event()
+        while (events.hasNextEvent()) {
+            events.getNextEvent(event)
+            if (event.eventType == UsageEvents.Event.ACTIVITY_RESUMED) {
+                lastForeground = event.packageName
+            }
+        }
+        return lastForeground == Telephony.Sms.getDefaultSmsPackage(this)
+    }
 
     private fun attachOverlay() {
         val owner = OverlayLifecycleOwner().also { lifecycleOwner = it }
@@ -160,6 +189,16 @@ class DetectionOverlayService : Service() {
     }
 
     companion object {
+        /** Whether the Usage Access special permission has been granted. */
+        fun hasUsageAccess(context: Context): Boolean {
+            val appOps = context.getSystemService(APP_OPS_SERVICE) as AppOpsManager
+            @Suppress("DEPRECATION") //unsafeCheckOpNoThrow needs API 29, minSdk is 26
+            val mode = appOps.checkOpNoThrow(
+                AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), context.packageName
+            )
+            return mode == AppOpsManager.MODE_ALLOWED
+        }
+
         private const val ACTION_SHOW = "com.example.vigil.detection.action.SHOW"
         private const val ACTION_HIDE = "com.example.vigil.detection.action.HIDE"
 
