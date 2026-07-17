@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -5,9 +6,13 @@ from sklearn.metrics import classification_report, confusion_matrix
 from optimum.onnxruntime import ORTModelForSequenceClassification
 from transformers import AutoTokenizer
 
-MODEL_DIR = "./model_onnx_quantized"
+#pass a model dir to compare against the shipped model, e.g.:
+#python evaluate_onnx.py ./model_shipped
+MODEL_DIR = sys.argv[1] if len(sys.argv) > 1 else "./model_onnx_quantized"
 
-tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR)
+#the shipped app model dir only has config.json + the .onnx file (no
+#tokenizer files) since fine-tuning never touches the base vocab
+tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
 model = ORTModelForSequenceClassification.from_pretrained(MODEL_DIR, file_name="model_quantized.onnx")
 id2label = model.config.id2label
 label2id = model.config.label2id
@@ -44,7 +49,7 @@ for i in range(0, len(texts), BATCH_SIZE):
 pred_ids = np.array(pred_ids)
 target_names = [id2label[i] for i in sorted(id2label)]
 
-print("=== Classification report (quantized ONNX model) ===")
+print(f"=== Classification report ({MODEL_DIR}) ===")
 print(classification_report(true_ids, pred_ids, target_names=target_names, digits=3))
 
 print("=== Confusion matrix ===")
