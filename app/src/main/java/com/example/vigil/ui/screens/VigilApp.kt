@@ -44,10 +44,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import com.example.vigil.OnboardingPrefs
+import com.example.vigil.detection.DetectionOverlayService
 import com.example.vigil.ui.theme.VigilPrimary
 
 // Onboarding step order 
-private enum class Flow { Welcome, Facts, Overview, Privacy, Permissions, OverlayPermission, Main }
+private enum class Flow { Welcome, Facts, Overview, Privacy, Permissions, OverlayPermission, UsageAccess, Main }
 
 // Set to true once onboarding testing is done: returning users then skip straight
 private const val ONBOARDING_PERSISTENCE_ENABLED = false
@@ -75,6 +76,12 @@ fun VigilApp(modifier: Modifier = Modifier) {
     // "Display over other apps" has no runtime dialog — it's a Settings toggle,
     // so we launch the Settings page and move on when the user comes back.
     val overlayPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        step = Flow.UsageAccess
+    }
+    // Same pattern for "Usage access".
+    val usageAccessLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
         completeOnboarding()
@@ -129,7 +136,7 @@ fun VigilApp(modifier: Modifier = Modifier) {
                     "Allow & Continue",
                     {
                         if (Settings.canDrawOverlays(context)) {
-                            completeOnboarding()
+                            step = Flow.UsageAccess
                         } else {
                             overlayPermissionLauncher.launch(
                                 Intent(
@@ -140,11 +147,26 @@ fun VigilApp(modifier: Modifier = Modifier) {
                         }
                     },
                     secondary = {
-                        TextButton(onClick = completeOnboarding) {
+                        TextButton(onClick = { step = Flow.UsageAccess }) {
                             Text("Maybe later", color = VigilPrimary, fontWeight = FontWeight.SemiBold)
                         }
                     }
                 ) { OverlayPermissionScreen() }
+                Flow.UsageAccess -> OnboardScaffold(
+                    "Allow & Continue",
+                    {
+                        if (DetectionOverlayService.hasUsageAccess(context)) {
+                            completeOnboarding()
+                        } else {
+                            usageAccessLauncher.launch(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
+                        }
+                    },
+                    secondary = {
+                        TextButton(onClick = completeOnboarding) {
+                            Text("Maybe later", color = VigilPrimary, fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+                ) { UsageAccessScreen() }
                 Flow.Main -> MainShell(
                     permissionGranted = smsPermissionGranted,
                     onRequestPermission = { smsPermissionLauncher.launch(arrayOf(Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS)) }
