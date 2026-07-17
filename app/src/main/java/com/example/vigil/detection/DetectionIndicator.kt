@@ -49,12 +49,12 @@ private const val EXIT_ANIMATION_MILLIS = 250
 const val DEFAULT_AUTO_DISMISS_MILLIS = 4_000L
 
 /** Resolved colors for one severity level in the current theme. */
-private data class SeverityColors(
+data class SeverityColors(
     val accent: Color,
     val iconBackground: Color,
 )
 
-private fun severityColors(severity: Severity, darkTheme: Boolean): SeverityColors = when (severity) {
+fun severityColors(severity: Severity, darkTheme: Boolean): SeverityColors = when (severity) {
     Severity.SAFE -> if (darkTheme) {
         SeverityColors(accent = Color(0xFF6DD58C), iconBackground = Color(0xFF1B3B25))
     } else {
@@ -80,7 +80,7 @@ private fun severityColors(severity: Severity, darkTheme: Boolean): SeverityColo
     }
 }
 
-private fun severityIcon(severity: Severity): ImageVector = when (severity) {
+fun severityIcon(severity: Severity): ImageVector = when (severity) {
     Severity.SAFE -> Icons.Rounded.VerifiedUser
     Severity.MEDIUM -> Icons.Rounded.Report
     Severity.HIGH -> Icons.Rounded.GppMaybe

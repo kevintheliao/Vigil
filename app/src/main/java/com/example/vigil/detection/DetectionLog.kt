@@ -18,7 +18,7 @@ data class DetectionLogEntry(
 object DetectionLog {
     private const val PREFS_NAME = "vigil_prefs"
     private const val KEY_ENTRIES = "detection_log_entries"
-    private const val MAX_ENTRIES = 20
+    private const val MAX_ENTRIES = 100
 
     private val _entries = MutableStateFlow<List<DetectionLogEntry>>(emptyList())
     val entries: StateFlow<List<DetectionLogEntry>> = _entries.asStateFlow()

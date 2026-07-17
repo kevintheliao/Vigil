@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -182,7 +183,7 @@ private fun OnboardScaffold(
     ) { pad -> Box(Modifier.padding(pad)) { content() } }
 }
 
-private enum class Tab { Home, Education }
+private enum class Tab { Home, Logs, Education }
 
 @Composable
 private fun MainShell(permissionGranted: Boolean, onRequestPermission: () -> Unit) {
@@ -197,6 +198,12 @@ private fun MainShell(permissionGranted: Boolean, onRequestPermission: () -> Uni
                     label = { Text("Home") }
                 )
                 NavigationBarItem(
+                    selected = tab == Tab.Logs,
+                    onClick = { tab = Tab.Logs },
+                    icon = { Icon(Icons.Filled.History, contentDescription = "Logs") },
+                    label = { Text("Logs") }
+                )
+                NavigationBarItem(
                     selected = tab == Tab.Education,
                     onClick = { tab = Tab.Education },
                     icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Education") },
@@ -207,7 +214,8 @@ private fun MainShell(permissionGranted: Boolean, onRequestPermission: () -> Uni
     ) { pad ->
         val inner = Modifier.fillMaxSize().padding(pad)
         when (tab) {
-            Tab.Home -> HomeScreen(inner, permissionGranted, onRequestPermission)
+            Tab.Home -> HomeScreen(inner, permissionGranted, onRequestPermission, onViewAll = { tab = Tab.Logs })
+            Tab.Logs -> AllLogsScreen(inner)
             Tab.Education -> EducationScreen(inner)
         }
     }
