@@ -1,16 +1,11 @@
 package com.example.vigil.detection
 
-/**
- * Severity of a detected message, used to color the overlay chip.
- */
+/** Severity of a detected message, used to color the overlay chip. */
 enum class Severity {
     SAFE, MEDIUM, HIGH, UNKNOWN
 }
 
-/**
- * UI state for the minimal detection indicator chip shown as a system
- * overlay while the user is in another app (e.g. Android Messages).
- */
+/** UI state for the detection chip shown as a system overlay over other apps. */
 data class DetectionUiState(
     val severity: Severity,
     /** Short text to show, e.g. "High risk: Scam". */

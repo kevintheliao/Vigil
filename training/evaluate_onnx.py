@@ -6,12 +6,10 @@ from sklearn.metrics import classification_report, confusion_matrix
 from optimum.onnxruntime import ORTModelForSequenceClassification
 from transformers import AutoTokenizer
 
-#pass a model dir to compare against the shipped model, e.g.:
-#python evaluate_onnx.py ./model_shipped
+#optional arg: model dir to evaluate, e.g. python evaluate_onnx.py ./model_shipped
 MODEL_DIR = sys.argv[1] if len(sys.argv) > 1 else "./model_onnx_quantized"
 
-#the shipped app model dir only has config.json + the .onnx file (no
-#tokenizer files) since fine-tuning never touches the base vocab
+#base tokenizer: fine-tuning never touches the vocab, and shipped model dirs lack tokenizer files
 tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
 model = ORTModelForSequenceClassification.from_pretrained(MODEL_DIR, file_name="model_quantized.onnx")
 id2label = model.config.id2label
@@ -32,8 +30,7 @@ _, test_df = train_test_split(
     df, test_size=0.2, random_state=42, stratify=df["label_id"]
 )
 
-#run inference in batches (manual loop, since the quantized ONNX
-#model isn't a plain PyTorch model that HF's Trainer.predict expects)
+#manual batch loop: quantized ONNX model isn't what HF Trainer.predict expects
 BATCH_SIZE = 32
 texts = test_df["text"].tolist()
 true_ids = test_df["label_id"].to_numpy()

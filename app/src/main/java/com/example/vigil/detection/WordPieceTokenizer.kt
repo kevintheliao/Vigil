@@ -4,9 +4,7 @@ import android.content.Context
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
-/**
- * BERT-style WordPiece tokenizer
- */
+/** BERT-style WordPiece tokenizer. */
 class WordPieceTokenizer(context: Context, private val maxSequenceLength: Int = 128) {
 
     private val vocab: Map<String, Long>

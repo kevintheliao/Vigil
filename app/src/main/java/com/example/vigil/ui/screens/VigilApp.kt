@@ -73,8 +73,7 @@ fun VigilApp(modifier: Modifier = Modifier) {
         smsPermissionGranted = results.values.all { it }
         step = Flow.OverlayPermission
     }
-    // "Display over other apps" has no runtime dialog — it's a Settings toggle,
-    // so we launch the Settings page and move on when the user comes back.
+    // Overlay permission is a Settings toggle, not a dialog: launch Settings, continue on return.
     val overlayPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
@@ -176,12 +175,7 @@ fun VigilApp(modifier: Modifier = Modifier) {
     }
 }
 
-/**
- * Onboarding wrapper: content area plus a primary CTA anchored a fixed 24dp from the
- * bottom on every step, so the button lands at the same height across all screens.
- * An optional [secondary] element (caption or link) renders ABOVE the button so it
- * never shifts the button's vertical position.
- */
+/** Onboarding wrapper: pins the CTA at a fixed height on every step, with an optional [secondary] slot above it. */
 @Composable
 private fun OnboardScaffold(
     buttonText: String,

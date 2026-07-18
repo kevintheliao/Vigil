@@ -112,8 +112,7 @@ private fun StatCard(value: String, label: String, modifier: Modifier = Modifier
     }
 }
 
-/** Citation footer for the stats above — rendered by the onboarding scaffold
- *  just above the Continue button. */
+/** Citation footer for the stats above, rendered just above the Continue button. */
 @Composable
 fun SafetyFactsSources(modifier: Modifier = Modifier) {
     Text(
