@@ -52,7 +52,6 @@ import com.example.vigil.detection.DetectionLogEntry
 import com.example.vigil.detection.DetectionOverlayService
 import com.example.vigil.ui.theme.VigilPrimary
 
-// Onboarding step order 
 private enum class Flow { Welcome, Facts, Overview, Privacy, Permissions, OverlayPermission, UsageAccess, Main }
 
 // Set to true once onboarding testing is done: returning users then skip straight
@@ -90,7 +89,6 @@ fun VigilApp(
     ) {
         step = Flow.UsageAccess
     }
-    // Same pattern for "Usage access".
     val usageAccessLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
@@ -240,11 +238,9 @@ private fun MainShell(
         targetState = shownAnalysis != null,
         transitionSpec = {
             if (targetState) {
-                //analysis slides up over the shell
                 slideInVertically(tween(300, easing = FastOutSlowInEasing)) { it / 4 } +
                     fadeIn(tween(200)) togetherWith fadeOut(tween(150))
             } else {
-                //back: analysis slides down and fades, shell fades in underneath
                 fadeIn(tween(200)) togetherWith
                     slideOutVertically(tween(300, easing = FastOutSlowInEasing)) { it / 4 } +
                     fadeOut(tween(200))
