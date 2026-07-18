@@ -1,6 +1,8 @@
 package com.example.vigil.ui.screens
 
+import android.content.Intent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,10 +21,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ForwardToInbox
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.DoNotTouch
 import androidx.compose.material.icons.filled.LinkOff
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Sms
 import androidx.compose.material.icons.filled.SpeakerNotesOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,8 +40,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import com.example.vigil.detection.MessageScorer
 import com.example.vigil.detection.Severity
 import com.example.vigil.detection.severityColors
@@ -133,6 +140,55 @@ fun AnalysisScreen(args: AnalysisArgs, onBack: () -> Unit, modifier: Modifier = 
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             guidance(args.verdict).forEach { (icon, title, detail) ->
                 FeatureRow(icon, title, detail)
+            }
+        }
+        Spacer(Modifier.height(24.dp))
+
+        val context = LocalContext.current
+        SectionLabel("Get help")
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (args.verdict.contains("scam", ignoreCase = true)) {
+                FeatureRow(
+                    Icons.AutoMirrored.Filled.ForwardToInbox,
+                    "Forward to 7726 (SPAM)",
+                    "Free reporting line run by all major carriers. Tap to forward this message.",
+                    modifier = Modifier.clickable {
+                        context.startActivity(
+                            Intent(Intent.ACTION_SENDTO, "smsto:7726".toUri())
+                                .putExtra("sms_body", args.body)
+                                .putExtra(Intent.EXTRA_TEXT, args.body)
+                        )
+                    },
+                )
+                FeatureRow(
+                    Icons.Filled.Phone,
+                    "Report to the FTC",
+                    "1-877-382-4357 (877-FTC-HELP), or online at reportfraud.ftc.gov. Tap to call.",
+                    modifier = Modifier.clickable {
+                        context.startActivity(Intent(Intent.ACTION_DIAL, "tel:18773824357".toUri()))
+                    },
+                )
+            } else {
+                FeatureRow(
+                    Icons.Filled.Phone,
+                    "988 Suicide & Crisis Lifeline",
+                    "Free, confidential, 24/7 support if messages like this are weighing on you. Tap to call 988.",
+                    modifier = Modifier.clickable {
+                        context.startActivity(Intent(Intent.ACTION_DIAL, "tel:988".toUri()))
+                    },
+                )
+                FeatureRow(
+                    Icons.Filled.Sms,
+                    "Crisis Text Line",
+                    "Text HOME to 741741 to reach a trained counselor, 24/7. Tap to start a text.",
+                    modifier = Modifier.clickable {
+                        context.startActivity(
+                            Intent(Intent.ACTION_SENDTO, "smsto:741741".toUri())
+                                .putExtra("sms_body", "HOME")
+                                .putExtra(Intent.EXTRA_TEXT, "HOME")
+                        )
+                    },
+                )
             }
         }
         Spacer(Modifier.height(24.dp))
