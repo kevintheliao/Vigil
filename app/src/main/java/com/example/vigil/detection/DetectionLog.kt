@@ -38,7 +38,7 @@ object DetectionLog {
         ensureLoaded(context)
         val entry = DetectionLogEntry(
             label = result.label,
-            snippet = messageBody.take(60),
+            snippet = messageBody.take(300),
             confidence = result.confidence,
             timestampMillis = System.currentTimeMillis()
         )

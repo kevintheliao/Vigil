@@ -18,10 +18,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.vigil.detection.DetectionLog
+import com.example.vigil.detection.DetectionLogEntry
 
 /** All Logs tab — full detection history, newest first. */
 @Composable
-fun AllLogsScreen(modifier: Modifier = Modifier) {
+fun AllLogsScreen(modifier: Modifier = Modifier, onEntryClick: (DetectionLogEntry) -> Unit = {}) {
     val context = LocalContext.current
     LaunchedEffect(Unit) { DetectionLog.ensureLoaded(context) }
     val logEntries by DetectionLog.entries.collectAsState()
@@ -49,7 +50,7 @@ fun AllLogsScreen(modifier: Modifier = Modifier) {
                 )
             }
         } else {
-            items(logEntries) { entry -> LogRow(entry = entry) }
+            items(logEntries) { entry -> LogRow(entry = entry, onClick = { onEntryClick(entry) }) }
         }
     }
 }
