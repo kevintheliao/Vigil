@@ -2,7 +2,7 @@ package com.example.vigil.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Vigil palette (from Stitch DESIGN.md)
+// Vigil palette
 val VigilPrimary = Color(0xFF0061A4)
 val VigilPrimaryContainer = Color(0xFF2196F3)
 val VigilOnPrimary = Color(0xFFFFFFFF)

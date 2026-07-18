@@ -91,7 +91,6 @@ fun EducationScreen(modifier: Modifier = Modifier) {
         }
         Spacer(Modifier.height(16.dp))
 
-        // Hero banner
         Box(
             Modifier.fillMaxWidth().background(VigilPrimaryContainer, RoundedCornerShape(16.dp)).padding(20.dp)
         ) {
