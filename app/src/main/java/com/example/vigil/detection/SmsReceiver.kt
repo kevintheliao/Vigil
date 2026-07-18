@@ -23,7 +23,7 @@ class SmsReceiver : BroadcastReceiver() {
                 val result = classifier(appContext).classify(body)
                 if (result.label != MlLabel.SAFE) {
                     DetectionLog.add(appContext, result, body)
-                    DetectionOverlayService.show(appContext, result.toDetectionUiState())
+                    DetectionOverlayService.show(appContext, result.toDetectionUiState(body))
                 }
             } finally {
                 pendingResult.finish()
@@ -31,10 +31,10 @@ class SmsReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun MlClassification.toDetectionUiState(): DetectionUiState {
+    private fun MlClassification.toDetectionUiState(body: String): DetectionUiState {
         val severity = if (confidence >= 0.85f) Severity.HIGH else Severity.MEDIUM
         val message = if (label == MlLabel.SCAM) "Possible scam" else "Possible harassment"
-        return DetectionUiState(severity = severity, message = message, riskScore = (confidence * 100).toInt())
+        return DetectionUiState(severity = severity, message = message, riskScore = (confidence * 100).toInt(), body = body)
     }
 
     companion object {
