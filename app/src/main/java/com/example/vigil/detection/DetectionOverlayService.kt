@@ -65,7 +65,9 @@ class DetectionOverlayService : Service() {
 
         val usageStats = getSystemService(USAGE_STATS_SERVICE) as UsageStatsManager
         val now = System.currentTimeMillis()
-        val events = usageStats.queryEvents(now - 60_000, now)
+        //long lookback: the user may have been sitting in the SMS app for a while,
+        //so the most recent ACTIVITY_RESUMED event can be old
+        val events = usageStats.queryEvents(now - 3_600_000, now)
         var lastForeground: String? = null
         val event = UsageEvents.Event()
         while (events.hasNextEvent()) {
