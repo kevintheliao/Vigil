@@ -12,6 +12,8 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import com.example.vigil.OnboardingPrefs
+import com.example.vigil.detection.DetectionLogEntry
 import com.example.vigil.detection.DetectionOverlayService
 import com.example.vigil.ui.theme.VigilPrimary
 
@@ -222,33 +225,67 @@ private fun MainShell(
     //log-row taps open the same screen; chip-tap args (activity intent) take precedence
     var logAnalysis by remember { mutableStateOf<AnalysisArgs?>(null) }
     val shownAnalysis = analysisArgs ?: logAnalysis
-    if (shownAnalysis != null) {
-        val dismiss = {
-            logAnalysis = null
-            onAnalysisDismissed()
-        }
-        BackHandler(onBack = dismiss)
-        AnalysisScreen(args = shownAnalysis, onBack = dismiss)
-        return
+    val dismiss = {
+        logAnalysis = null
+        onAnalysisDismissed()
     }
+    //hold the last args so the screen still has content during the exit slide
+    var lastAnalysis by remember { mutableStateOf<AnalysisArgs?>(null) }
+    if (shownAnalysis != null) {
+        lastAnalysis = shownAnalysis
+        BackHandler(onBack = dismiss)
+    }
+
+    AnimatedContent(
+        targetState = shownAnalysis != null,
+        transitionSpec = {
+            if (targetState) {
+                //analysis slides up over the shell
+                slideInVertically(tween(300, easing = FastOutSlowInEasing)) { it / 4 } +
+                    fadeIn(tween(200)) togetherWith fadeOut(tween(150))
+            } else {
+                //back: analysis slides down and fades, shell fades in underneath
+                fadeIn(tween(200)) togetherWith
+                    slideOutVertically(tween(300, easing = FastOutSlowInEasing)) { it / 4 } +
+                    fadeOut(tween(200))
+            }
+        },
+        label = "analysis-transition",
+    ) { showAnalysis ->
+        if (showAnalysis) {
+            lastAnalysis?.let { AnalysisScreen(args = it, onBack = dismiss) }
+        } else {
+            MainTabs(tab, { tab = it }, permissionGranted, onRequestPermission, onEntryClick = { logAnalysis = it.toAnalysisArgs() })
+        }
+    }
+}
+
+@Composable
+private fun MainTabs(
+    tab: Tab,
+    onTabChange: (Tab) -> Unit,
+    permissionGranted: Boolean,
+    onRequestPermission: () -> Unit,
+    onEntryClick: (DetectionLogEntry) -> Unit,
+) {
     Scaffold(
         bottomBar = {
             NavigationBar {
                 NavigationBarItem(
                     selected = tab == Tab.Home,
-                    onClick = { tab = Tab.Home },
+                    onClick = { onTabChange(Tab.Home) },
                     icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
                     label = { Text("Home") }
                 )
                 NavigationBarItem(
                     selected = tab == Tab.Logs,
-                    onClick = { tab = Tab.Logs },
+                    onClick = { onTabChange(Tab.Logs) },
                     icon = { Icon(Icons.Filled.History, contentDescription = "Logs") },
                     label = { Text("Logs") }
                 )
                 NavigationBarItem(
                     selected = tab == Tab.Education,
-                    onClick = { tab = Tab.Education },
+                    onClick = { onTabChange(Tab.Education) },
                     icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Education") },
                     label = { Text("Education") }
                 )
@@ -259,10 +296,10 @@ private fun MainShell(
         when (tab) {
             Tab.Home -> HomeScreen(
                 inner, permissionGranted, onRequestPermission,
-                onViewAll = { tab = Tab.Logs },
-                onEntryClick = { logAnalysis = it.toAnalysisArgs() },
+                onViewAll = { onTabChange(Tab.Logs) },
+                onEntryClick = onEntryClick,
             )
-            Tab.Logs -> AllLogsScreen(inner, onEntryClick = { logAnalysis = it.toAnalysisArgs() })
+            Tab.Logs -> AllLogsScreen(inner, onEntryClick = onEntryClick)
             Tab.Education -> EducationScreen(inner)
         }
     }
