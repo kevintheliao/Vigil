@@ -3,6 +3,7 @@ package com.example.vigil.ui.screens
 import android.Manifest
 import android.content.Intent
 import android.provider.Settings
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
@@ -31,6 +32,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,14 +56,20 @@ private enum class Flow { Welcome, Facts, Overview, Privacy, Permissions, Overla
 private const val ONBOARDING_PERSISTENCE_ENABLED = false
 
 @Composable
-fun VigilApp(modifier: Modifier = Modifier) {
+fun VigilApp(
+    modifier: Modifier = Modifier,
+    analysisArgs: AnalysisArgs? = null,
+    onAnalysisDismissed: () -> Unit = {},
+) {
     val context = LocalContext.current
     var step by remember {
         mutableStateOf(
-            if (ONBOARDING_PERSISTENCE_ENABLED && OnboardingPrefs.isCompleted(context)) Flow.Main
+            if (analysisArgs != null || (ONBOARDING_PERSISTENCE_ENABLED && OnboardingPrefs.isCompleted(context))) Flow.Main
             else Flow.Welcome
         )
     }
+    //chip tap while onboarding is on screen: jump to Main so the analysis can show
+    LaunchedEffect(analysisArgs) { if (analysisArgs != null) step = Flow.Main }
     var smsPermissionGranted by remember { mutableStateOf(true) }
     val completeOnboarding = {
         OnboardingPrefs.setCompleted(context)
@@ -168,7 +176,9 @@ fun VigilApp(modifier: Modifier = Modifier) {
                 ) { UsageAccessScreen() }
                 Flow.Main -> MainShell(
                     permissionGranted = smsPermissionGranted,
-                    onRequestPermission = { smsPermissionLauncher.launch(arrayOf(Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS)) }
+                    onRequestPermission = { smsPermissionLauncher.launch(arrayOf(Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS)) },
+                    analysisArgs = analysisArgs,
+                    onAnalysisDismissed = onAnalysisDismissed,
                 )
             }
         }
@@ -202,8 +212,18 @@ private fun OnboardScaffold(
 private enum class Tab { Home, Logs, Education }
 
 @Composable
-private fun MainShell(permissionGranted: Boolean, onRequestPermission: () -> Unit) {
+private fun MainShell(
+    permissionGranted: Boolean,
+    onRequestPermission: () -> Unit,
+    analysisArgs: AnalysisArgs? = null,
+    onAnalysisDismissed: () -> Unit = {},
+) {
     var tab by remember { mutableStateOf(Tab.Home) }
+    if (analysisArgs != null) {
+        BackHandler(onBack = onAnalysisDismissed)
+        AnalysisScreen(args = analysisArgs, onBack = onAnalysisDismissed)
+        return
+    }
     Scaffold(
         bottomBar = {
             NavigationBar {
