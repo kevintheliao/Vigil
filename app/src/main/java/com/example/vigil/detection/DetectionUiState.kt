@@ -12,5 +12,7 @@ data class DetectionUiState(
     val message: String,
     /** Optional risk score 0-100 shown after the message. */
     val riskScore: Int? = null,
+    /** Full SMS text; not rendered by the chip, carried through to the analysis screen. */
+    val body: String = "",
     val isVisible: Boolean = true,
 )

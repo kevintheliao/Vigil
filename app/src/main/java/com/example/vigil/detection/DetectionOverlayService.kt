@@ -125,6 +125,7 @@ class DetectionOverlayService : Service() {
                 putExtra(EXTRA_OPEN_ANALYSIS, true)
                 putExtra(EXTRA_SEVERITY, state?.severity?.name)
                 putExtra(EXTRA_MESSAGE, state?.message)
+                putExtra(EXTRA_BODY, state?.body)
                 state?.riskScore?.let { putExtra(EXTRA_RISK_SCORE, it) }
             }
         )
@@ -183,9 +184,10 @@ class DetectionOverlayService : Service() {
         private const val ACTION_SHOW = "com.example.vigil.detection.action.SHOW"
         private const val ACTION_HIDE = "com.example.vigil.detection.action.HIDE"
 
-        private const val EXTRA_SEVERITY = "com.example.vigil.detection.extra.SEVERITY"
-        private const val EXTRA_MESSAGE = "com.example.vigil.detection.extra.MESSAGE"
-        private const val EXTRA_RISK_SCORE = "com.example.vigil.detection.extra.RISK_SCORE"
+        const val EXTRA_SEVERITY = "com.example.vigil.detection.extra.SEVERITY"
+        const val EXTRA_MESSAGE = "com.example.vigil.detection.extra.MESSAGE"
+        const val EXTRA_RISK_SCORE = "com.example.vigil.detection.extra.RISK_SCORE"
+        const val EXTRA_BODY = "com.example.vigil.detection.extra.BODY"
 
         /** Set on the MainActivity intent when the user taps the chip. */
         const val EXTRA_OPEN_ANALYSIS = "com.example.vigil.detection.extra.OPEN_ANALYSIS"
@@ -197,6 +199,7 @@ class DetectionOverlayService : Service() {
                     action = ACTION_SHOW
                     putExtra(EXTRA_SEVERITY, state.severity.name)
                     putExtra(EXTRA_MESSAGE, state.message)
+                    putExtra(EXTRA_BODY, state.body)
                     state.riskScore?.let { putExtra(EXTRA_RISK_SCORE, it) }
                 }
             )
@@ -217,7 +220,8 @@ class DetectionOverlayService : Service() {
                 ?.let { runCatching { Severity.valueOf(it) }.getOrNull() }
                 ?: Severity.UNKNOWN
             val riskScore = if (hasExtra(EXTRA_RISK_SCORE)) getIntExtra(EXTRA_RISK_SCORE, 0) else null
-            return DetectionUiState(severity = severity, message = message, riskScore = riskScore)
+            val body = getStringExtra(EXTRA_BODY) ?: ""
+            return DetectionUiState(severity = severity, message = message, riskScore = riskScore, body = body)
         }
     }
 }
