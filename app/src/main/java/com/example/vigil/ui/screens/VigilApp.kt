@@ -219,9 +219,16 @@ private fun MainShell(
     onAnalysisDismissed: () -> Unit = {},
 ) {
     var tab by remember { mutableStateOf(Tab.Home) }
-    if (analysisArgs != null) {
-        BackHandler(onBack = onAnalysisDismissed)
-        AnalysisScreen(args = analysisArgs, onBack = onAnalysisDismissed)
+    //log-row taps open the same screen; chip-tap args (activity intent) take precedence
+    var logAnalysis by remember { mutableStateOf<AnalysisArgs?>(null) }
+    val shownAnalysis = analysisArgs ?: logAnalysis
+    if (shownAnalysis != null) {
+        val dismiss = {
+            logAnalysis = null
+            onAnalysisDismissed()
+        }
+        BackHandler(onBack = dismiss)
+        AnalysisScreen(args = shownAnalysis, onBack = dismiss)
         return
     }
     Scaffold(
@@ -250,8 +257,12 @@ private fun MainShell(
     ) { pad ->
         val inner = Modifier.fillMaxSize().padding(pad)
         when (tab) {
-            Tab.Home -> HomeScreen(inner, permissionGranted, onRequestPermission, onViewAll = { tab = Tab.Logs })
-            Tab.Logs -> AllLogsScreen(inner)
+            Tab.Home -> HomeScreen(
+                inner, permissionGranted, onRequestPermission,
+                onViewAll = { tab = Tab.Logs },
+                onEntryClick = { logAnalysis = it.toAnalysisArgs() },
+            )
+            Tab.Logs -> AllLogsScreen(inner, onEntryClick = { logAnalysis = it.toAnalysisArgs() })
             Tab.Education -> EducationScreen(inner)
         }
     }

@@ -56,7 +56,8 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     permissionGranted: Boolean = true,
     onRequestPermission: () -> Unit = {},
-    onViewAll: () -> Unit = {}
+    onViewAll: () -> Unit = {},
+    onEntryClick: (DetectionLogEntry) -> Unit = {}
 ) {
     val statusTint = if (permissionGranted) VigilPrimary else MaterialTheme.colorScheme.error
     val haloTint = if (permissionGranted) VigilPrimaryFixed else MaterialTheme.colorScheme.error
@@ -136,7 +137,7 @@ fun HomeScreen(
             )
         } else {
             logEntries.take(COLLAPSED_LOG_COUNT).forEach { entry ->
-                LogRow(entry = entry)
+                LogRow(entry = entry, onClick = { onEntryClick(entry) })
                 Spacer(Modifier.height(12.dp))
             }
         }
@@ -156,6 +157,13 @@ internal fun DetectionLogEntry.severity(): Severity = when {
     confidence >= 0.85f -> Severity.HIGH
     else -> Severity.MEDIUM
 }
+
+internal fun DetectionLogEntry.toAnalysisArgs(): AnalysisArgs = AnalysisArgs(
+    severity = severity(),
+    verdict = title(),
+    riskScore = (confidence * 100).toInt(),
+    body = snippet,
+)
 
 internal fun DetectionLogEntry.relativeTime(): String =
     DateUtils.getRelativeTimeSpanString(
@@ -181,10 +189,10 @@ private fun HomeTopBar() {
 }
 
 @Composable
-internal fun LogRow(entry: DetectionLogEntry) {
+internal fun LogRow(entry: DetectionLogEntry, onClick: () -> Unit = {}) {
     val severity = entry.severity()
     val colors = severityColors(severity, isSystemInDarkTheme())
-    VigilCard {
+    VigilCard(modifier = Modifier.clickable(onClick = onClick)) {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
                 Modifier.size(40.dp).background(colors.iconBackground, CircleShape),
