@@ -26,18 +26,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.example.vigil.MainActivity
 
-/**
- * Hosts the [DetectionIndicator] chip in a system overlay window so it can
- * appear on top of other apps (e.g. Android Messages) while Vigil is in the
- * background.
- *
- * Detection logic lives elsewhere; it drives this service through:
- * - [show] — display (or update) the chip for a detection result
- * - [hide] — remove the chip immediately
- *
- * Requires the SYSTEM_ALERT_WINDOW ("Display over other apps") permission;
- * if not granted the service stops itself without showing anything.
- */
+/** Hosts the [DetectionIndicator] chip in a system overlay window, driven via [show]/[hide]; needs SYSTEM_ALERT_WINDOW or it stops itself. */
 class DetectionOverlayService : Service() {
 
     private lateinit var windowManager: WindowManager
@@ -70,14 +59,7 @@ class DetectionOverlayService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    /**
-     * True when the user's default SMS app is the foreground app, so the chip
-     * only appears over the messaging conversation it belongs to.
-     *
-     * Requires the Usage Access special permission (a Settings toggle). Without
-     * it the foreground app is unknowable, so we fall back to showing the chip
-     * everywhere rather than silently never showing it.
-     */
+    /** True when the default SMS app is foreground; without Usage Access falls back to true so the chip still shows. */
     private fun smsAppIsForeground(): Boolean {
         if (!hasUsageAccess(this)) return true
 
@@ -167,10 +149,7 @@ class DetectionOverlayService : Service() {
         super.onDestroy()
     }
 
-    /**
-     * Minimal lifecycle + saved-state owner so a ComposeView can live in a
-     * WindowManager-managed window without an Activity.
-     */
+    /** Minimal lifecycle + saved-state owner so a ComposeView can live in a window without an Activity. */
     private class OverlayLifecycleOwner : LifecycleOwner, SavedStateRegistryOwner {
         private val lifecycleRegistry = LifecycleRegistry(this)
         private val savedStateRegistryController = SavedStateRegistryController.create(this)
@@ -209,11 +188,7 @@ class DetectionOverlayService : Service() {
         /** Set on the MainActivity intent when the user taps the chip. */
         const val EXTRA_OPEN_ANALYSIS = "com.example.vigil.detection.extra.OPEN_ANALYSIS"
 
-        /**
-         * Show (or update) the detection chip over the current foreground app.
-         * Call from detection logic when a suspicious message is found while
-         * the user is in another app.
-         */
+        /** Show (or update) the detection chip for a suspicious message. */
         fun show(context: Context, state: DetectionUiState) {
             context.startService(
                 Intent(context, DetectionOverlayService::class.java).apply {

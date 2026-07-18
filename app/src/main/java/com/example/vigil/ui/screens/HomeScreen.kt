@@ -150,8 +150,7 @@ internal fun DetectionLogEntry.title(): String = when (label) {
     MlLabel.HARASSMENT -> "Possible harassment"
 }
 
-//same rule SmsReceiver uses for the overlay chip, so a log row and the
-//chip it came from always show the same color
+//same severity rule as SmsReceiver so log rows match their chip's color
 internal fun DetectionLogEntry.severity(): Severity = when {
     label == MlLabel.SAFE -> Severity.SAFE
     confidence >= 0.85f -> Severity.HIGH

@@ -31,12 +31,7 @@ import com.example.vigil.ui.theme.VigilPrimary
 import com.example.vigil.ui.theme.VigilPrimaryFixed
 import com.example.vigil.ui.theme.VigilTheme
 
-/**
- * Onboarding step explaining the "Usage access" (PACKAGE_USAGE_STATS)
- * permission: it lets Vigil keep its alert chip inside the messaging app
- * instead of popping up over whatever the user happens to be doing.
- * Optional — skipping just means alerts can appear over any app.
- */
+/** Onboarding step explaining the optional "Usage access" permission; skipping means alerts show over any app. */
 @Composable
 fun UsageAccessScreen(modifier: Modifier = Modifier) {
     Column(

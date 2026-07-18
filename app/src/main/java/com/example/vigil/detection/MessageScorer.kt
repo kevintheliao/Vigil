@@ -10,11 +10,7 @@ data class ScoreResult(
     val matchedSignals: List<String>,
 )
 
-/**
- * Scores SMS text against known scam and harassment signals. Each matched
- * signal adds weight; the total (0-100) buckets into a [Severity]. Purely
- * keyword/regex based, on-device, no model and no network.
- */
+/** Keyword/regex scorer: matched signals add weight, total (0-100) buckets into a [Severity]. */
 object MessageScorer {
 
     private data class Signal(

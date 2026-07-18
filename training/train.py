@@ -21,9 +21,7 @@ id2label = {i: label for i, label in enumerate(LABELS)}
 df = pd.read_csv("data/combined.csv")
 df["label_id"] = df["label"].map(label2id)
 
-#cap the dominant SAFE class so training doesn't spend most of its
-#time on redundant examples; SCAM/HARASSMENT are kept as-is since
-#they're already scarce
+#cap dominant SAFE class; SCAM/HARASSMENT kept as-is since they're scarce
 SAFE_CAP = 30000
 safe_rows = df[df["label"] == "SAFE"]
 other_rows = df[df["label"] != "SAFE"]
@@ -43,8 +41,7 @@ class_weights = compute_class_weight(
 )
 class_weights = torch.tensor(class_weights, dtype=torch.float32)
 
-#tokenize (no fixed padding here; the data collator pads each batch
-#only to its own longest example, instead of every row to 128 tokens)
+#tokenize without fixed padding; the collator pads each batch to its own longest example
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 def tokenize(batch):
     return tokenizer(batch["text"], truncation=True, max_length=128)

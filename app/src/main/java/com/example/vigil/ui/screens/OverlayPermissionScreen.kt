@@ -30,11 +30,7 @@ import com.example.vigil.detection.DetectionUiState
 import com.example.vigil.detection.Severity
 import com.example.vigil.ui.theme.VigilTheme
 
-/**
- * Onboarding step explaining the "Display over other apps" (SYSTEM_ALERT_WINDOW)
- * permission: Vigil needs it to float the detection chip on top of the user's
- * messaging app the moment a threat is found.
- */
+/** Onboarding step explaining the "Display over other apps" (SYSTEM_ALERT_WINDOW) permission. */
 @Composable
 fun OverlayPermissionScreen(modifier: Modifier = Modifier) {
     Column(
@@ -45,8 +41,7 @@ fun OverlayPermissionScreen(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Live sample of the alert chip on a faux conversation backdrop, so the
-        // user sees exactly what this permission enables.
+        // Live sample of the alert chip so the user sees what this permission enables.
         Box(
             modifier = Modifier
                 .fillMaxWidth()

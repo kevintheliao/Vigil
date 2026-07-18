@@ -141,11 +141,7 @@ private val scanDemoScenarios = listOf(
     )
 )
 
-/**
- * Fake "screen recording" of a messaging app receiving threatening texts, with
- * Vigil's AI sweeping in to flag them. Cycles through a harassment scenario and a
- * phishing-scam scenario, looping continuously.
- */
+/** Fake messaging-app demo that loops through harassment and phishing scenarios being flagged. */
 @Composable
 fun MessagesScanDemo(modifier: Modifier = Modifier) {
     var scenarioIndex by remember { mutableStateOf(0) }
@@ -221,9 +217,7 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
                     .padding(16.dp)
                     .onGloballyPositioned { containerCoords = it }
             ) {
-                // Keyed on the scenario so switching scenarios fully discards the old
-                // bubbles instead of patching their text mid-exit-animation, which used
-                // to flash the next scenario's message inside the old bubble briefly.
+                // Keyed on the scenario so old bubbles are discarded, not text-patched mid-exit (used to flash).
                 key(scenarioIndex) {
                     Column(
                         modifier = Modifier.fillMaxSize(),
@@ -281,9 +275,7 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
                         val start = container.localPositionOf(badge, Offset(badge.size.width / 2f, badge.size.height.toFloat()))
                         val end = container.localPositionOf(bubble, Offset(bubble.size.width.toFloat(), 0f))
 
-                        // Right-angle elbow connector, routed down the right margin (where
-                        // left-anchored bubbles never reach) instead of cutting a diagonal
-                        // across the other messages.
+                        // Right-angle elbow connector routed down the right margin, clear of the bubbles.
                         val rightEdge = size.width - 8.dp.toPx()
                         val cornerX = maxOf(start.x, end.x).coerceAtMost(rightEdge)
                         val cornerRadius = 10.dp.toPx()

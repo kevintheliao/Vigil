@@ -87,13 +87,7 @@ fun severityIcon(severity: Severity): ImageVector = when (severity) {
     Severity.UNKNOWN -> Icons.Rounded.HelpOutline
 }
 
-/**
- * Minimal detection indicator overlay: fades in + slides up from the bottom,
- * auto-dismisses after [autoDismissMillis], and calls [onTap] when tapped.
- *
- * [onDismissed] fires after the exit animation completes so the host
- * (overlay service) can remove the window.
- */
+/** Animated chip overlay: auto-dismisses after [autoDismissMillis]; [onDismissed] fires after the exit animation so the host can remove the window. */
 @Composable
 fun DetectionIndicator(
     state: DetectionUiState,
@@ -128,10 +122,7 @@ fun DetectionIndicator(
     }
 }
 
-/**
- * The chip itself, with no animation or auto-dismiss. Kept separate so
- * previews can render every state statically.
- */
+/** The chip itself, no animation or auto-dismiss, so previews can render every state statically. */
 @Composable
 fun DetectionIndicatorChip(
     state: DetectionUiState,

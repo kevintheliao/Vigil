@@ -6,12 +6,7 @@ import android.content.Intent
 import android.provider.Telephony
 import kotlin.concurrent.thread
 
-/**
- * Fires on every incoming SMS. Classifies it with the on-device ONNX
- * model and shows the overlay chip for anything that isn't SAFE.
- * Classification runs on a background thread (via goAsync) since ONNX
- * inference shouldn't block the receiver's onReceive.
- */
+/** Classifies every incoming SMS on a background thread (goAsync) and shows the chip for non-SAFE results. */
 class SmsReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
