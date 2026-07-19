@@ -53,7 +53,7 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import com.example.sentinel.R
+import com.vigilapp.vigil.R
 import com.example.vigil.detection.DetectionIndicatorChip
 import com.example.vigil.detection.DetectionUiState
 import com.example.vigil.detection.Severity
