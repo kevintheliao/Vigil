@@ -47,6 +47,11 @@ object DetectionLog {
         writePrefs(context, updated)
     }
 
+    fun clear(context: Context) {
+        _entries.value = emptyList()
+        writePrefs(context, emptyList())
+    }
+
     private fun readPrefs(context: Context): List<DetectionLogEntry> {
         val raw = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             .getString(KEY_ENTRIES, null) ?: return emptyList()
