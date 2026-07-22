@@ -27,7 +27,7 @@ class WordPieceTokenizer(context: Context, private val maxSequenceLength: Int = 
     }
 
     fun tokenize(text: String): Pair<LongArray, LongArray> {
-        val wordPieces = basicTokenize(text).flatMap { wordPieceTokenize(it) }
+        val wordPieces = basicTokenize(collapseRepeatedChars(text)).flatMap { wordPieceTokenize(it) }
         val maxPieces = maxSequenceLength - 2 
         val truncated = wordPieces.take(maxPieces)
 

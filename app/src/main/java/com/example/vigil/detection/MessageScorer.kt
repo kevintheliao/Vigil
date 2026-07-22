@@ -76,7 +76,8 @@ object MessageScorer {
             return ScoreResult(Severity.UNKNOWN, riskScore = 0, category = null, matchedSignals = emptyList())
         }
 
-        val matched = signals.filter { it.pattern.containsMatchIn(text) }
+        val normalized = collapseRepeatedChars(text)
+        val matched = signals.filter { it.pattern.containsMatchIn(normalized) }
         val total = matched.sumOf { it.weight }.coerceIn(0, 100)
         val severity = when {
             total >= 60 -> Severity.HIGH
