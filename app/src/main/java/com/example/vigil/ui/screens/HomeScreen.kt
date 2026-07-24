@@ -23,6 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -57,7 +58,8 @@ fun HomeScreen(
     permissionGranted: Boolean = true,
     onRequestPermission: () -> Unit = {},
     onViewAll: () -> Unit = {},
-    onEntryClick: (DetectionLogEntry) -> Unit = {}
+    onEntryClick: (DetectionLogEntry) -> Unit = {},
+    onSettingsClick: () -> Unit = {}
 ) {
     val statusTint = if (permissionGranted) VigilPrimary else MaterialTheme.colorScheme.error
     val haloTint = if (permissionGranted) VigilPrimaryFixed else MaterialTheme.colorScheme.error
@@ -70,7 +72,7 @@ fun HomeScreen(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp)
     ) {
-        HomeTopBar()
+        HomeTopBar(onSettingsClick = onSettingsClick)
         Spacer(Modifier.height(24.dp))
 
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -173,7 +175,7 @@ internal fun DetectionLogEntry.relativeTime(): String =
     ).toString()
 
 @Composable
-private fun HomeTopBar() {
+private fun HomeTopBar(onSettingsClick: () -> Unit) {
     Row(
         Modifier.fillMaxWidth().padding(top = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -184,6 +186,13 @@ private fun HomeTopBar() {
             Icon(Icons.Filled.Notifications, contentDescription = "Notifications", tint = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.width(16.dp))
             Icon(Icons.Filled.AccountCircle, contentDescription = "Profile", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(32.dp))
+            Spacer(Modifier.width(16.dp))
+            Icon(
+                Icons.Filled.Settings,
+                contentDescription = "Settings",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.clickable(onClick = onSettingsClick)
+            )
         }
     }
 }
