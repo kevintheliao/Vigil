@@ -196,7 +196,7 @@ fun AnalysisScreen(args: AnalysisArgs, onBack: () -> Unit, modifier: Modifier = 
 }
 
 @Composable
-private fun SectionLabel(text: String) {
+internal fun SectionLabel(text: String) {
     Text(text, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
     Spacer(Modifier.height(8.dp))
 }
