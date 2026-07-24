@@ -222,8 +222,9 @@ private fun MainShell(
     var tab by remember { mutableStateOf(Tab.Home) }
     //log-row taps open the same screen; chip-tap args (activity intent) take precedence
     var logAnalysis by remember { mutableStateOf<AnalysisArgs?>(null) }
+    var showSettings by remember { mutableStateOf(false) }
     val shownAnalysis = analysisArgs ?: logAnalysis
-    val dismiss = {
+    val dismissAnalysis = {
         logAnalysis = null
         onAnalysisDismissed()
     }
@@ -231,11 +232,13 @@ private fun MainShell(
     var lastAnalysis by remember { mutableStateOf<AnalysisArgs?>(null) }
     if (shownAnalysis != null) {
         lastAnalysis = shownAnalysis
-        BackHandler(onBack = dismiss)
+        BackHandler(onBack = dismissAnalysis)
+    } else if (showSettings) {
+        BackHandler(onBack = { showSettings = false })
     }
 
     AnimatedContent(
-        targetState = shownAnalysis != null,
+        targetState = shownAnalysis != null || showSettings,
         transitionSpec = {
             if (targetState) {
                 slideInVertically(tween(300, easing = FastOutSlowInEasing)) { it / 4 } +
@@ -246,12 +249,20 @@ private fun MainShell(
                     fadeOut(tween(200))
             }
         },
-        label = "analysis-transition",
-    ) { showAnalysis ->
-        if (showAnalysis) {
-            lastAnalysis?.let { AnalysisScreen(args = it, onBack = dismiss) }
+        label = "overlay-transition",
+    ) { showOverlay ->
+        if (showOverlay) {
+            if (shownAnalysis != null) {
+                lastAnalysis?.let { AnalysisScreen(args = it, onBack = dismissAnalysis) }
+            } else {
+                SettingsScreen(onBack = { showSettings = false })
+            }
         } else {
-            MainTabs(tab, { tab = it }, permissionGranted, onRequestPermission, onEntryClick = { logAnalysis = it.toAnalysisArgs() })
+            MainTabs(
+                tab, { tab = it }, permissionGranted, onRequestPermission,
+                onEntryClick = { logAnalysis = it.toAnalysisArgs() },
+                onSettingsClick = { showSettings = true },
+            )
         }
     }
 }
@@ -263,6 +274,7 @@ private fun MainTabs(
     permissionGranted: Boolean,
     onRequestPermission: () -> Unit,
     onEntryClick: (DetectionLogEntry) -> Unit,
+    onSettingsClick: () -> Unit,
 ) {
     Scaffold(
         bottomBar = {
@@ -294,6 +306,7 @@ private fun MainTabs(
                 inner, permissionGranted, onRequestPermission,
                 onViewAll = { onTabChange(Tab.Logs) },
                 onEntryClick = onEntryClick,
+                onSettingsClick = onSettingsClick,
             )
             Tab.Logs -> AllLogsScreen(inner, onEntryClick = onEntryClick)
             Tab.Education -> EducationScreen(inner)
