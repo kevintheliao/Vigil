@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -15,6 +16,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -30,6 +34,7 @@ fun AllLogsScreen(modifier: Modifier = Modifier, onEntryClick: (DetectionLogEntr
     val context = LocalContext.current
     LaunchedEffect(Unit) { DetectionLog.ensureLoaded(context) }
     val logEntries by DetectionLog.entries.collectAsState()
+    var showClearConfirm by remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -49,7 +54,7 @@ fun AllLogsScreen(modifier: Modifier = Modifier, onEntryClick: (DetectionLogEntr
                     modifier = Modifier.weight(1f)
                 )
                 if (logEntries.isNotEmpty()) {
-                    TextButton(onClick = { DetectionLog.clear(context) }) {
+                    TextButton(onClick = { showClearConfirm = true }) {
                         Text("Clear history", fontSize = 13.sp)
                     }
                 }
@@ -66,5 +71,22 @@ fun AllLogsScreen(modifier: Modifier = Modifier, onEntryClick: (DetectionLogEntr
         } else {
             items(logEntries) { entry -> LogRow(entry = entry, onClick = { onEntryClick(entry) }) }
         }
+    }
+
+    if (showClearConfirm) {
+        AlertDialog(
+            onDismissRequest = { showClearConfirm = false },
+            title = { Text("Clear detection log?") },
+            text = { Text("This deletes every scanned message record on this device. This can't be undone.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    DetectionLog.clear(context)
+                    showClearConfirm = false
+                }) { Text("Clear", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showClearConfirm = false }) { Text("Cancel") }
+            },
+        )
     }
 }

@@ -1,6 +1,7 @@
 package com.example.vigil.ui.screens
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.provider.Settings
 import androidx.activity.compose.BackHandler
@@ -26,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -46,6 +48,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
 import com.example.vigil.OnboardingPrefs
 import com.example.vigil.detection.DetectionLogEntry
@@ -73,6 +76,8 @@ fun VigilApp(
     //chip tap while onboarding is on screen: jump to Main so the analysis can show
     LaunchedEffect(analysisArgs) { if (analysisArgs != null) step = Flow.Main }
     var smsPermissionGranted by remember { mutableStateOf(true) }
+    var smsRequestedOnce by remember { mutableStateOf(false) }
+    var showDataDialog by remember { mutableStateOf(false) }
     val completeOnboarding = {
         OnboardingPrefs.setCompleted(context)
         step = Flow.Main
@@ -81,7 +86,19 @@ fun VigilApp(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { results ->
         smsPermissionGranted = results.values.all { it }
+        smsRequestedOnce = true
         step = Flow.OverlayPermission
+    }
+    //android hides the rationale prompt both before the first ask and after "don't ask again";
+    //smsRequestedOnce disambiguates so we only offer the Settings deep link on real permanent denial
+    val smsPermanentlyDenied = smsRequestedOnce && !smsPermissionGranted &&
+        (context as? Activity)?.let {
+            !ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.READ_SMS)
+        } == true
+    val openAppSettings = {
+        context.startActivity(
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, "package:${context.packageName}".toUri())
+        )
     }
     // Overlay permission is a Settings toggle, not a dialog: launch Settings, continue on return.
     val overlayPermissionLauncher = rememberLauncherForActivityResult(
@@ -135,7 +152,7 @@ fun VigilApp(
                     "Enable & Continue",
                     { smsPermissionLauncher.launch(arrayOf(Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS)) },
                     secondary = {
-                        TextButton(onClick = {}) {
+                        TextButton(onClick = { showDataDialog = true }) {
                             Text("Learn how we handle data", color = VigilPrimary, fontWeight = FontWeight.SemiBold)
                         }
                     }
@@ -177,11 +194,30 @@ fun VigilApp(
                 ) { UsageAccessScreen() }
                 Flow.Main -> MainShell(
                     permissionGranted = smsPermissionGranted,
+                    permanentlyDenied = smsPermanentlyDenied,
                     onRequestPermission = { smsPermissionLauncher.launch(arrayOf(Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS)) },
+                    onOpenAppSettings = openAppSettings,
                     analysisArgs = analysisArgs,
                     onAnalysisDismissed = onAnalysisDismissed,
                 )
             }
+        }
+        if (showDataDialog) {
+            AlertDialog(
+                onDismissRequest = { showDataDialog = false },
+                title = { Text("How Vigil handles data") },
+                text = {
+                    Text(
+                        "Vigil has no internet permission, no servers, and no accounts. " +
+                            "Incoming texts are read on-device only to classify them for scams, " +
+                            "phishing, and harassment using a local ML model — nothing is ever " +
+                            "transmitted, sold, or shared, and no human ever sees your messages."
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = { showDataDialog = false }) { Text("Got it") }
+                },
+            )
         }
     }
 }
@@ -215,7 +251,9 @@ private enum class Tab { Home, Logs, Education }
 @Composable
 private fun MainShell(
     permissionGranted: Boolean,
+    permanentlyDenied: Boolean,
     onRequestPermission: () -> Unit,
+    onOpenAppSettings: () -> Unit,
     analysisArgs: AnalysisArgs? = null,
     onAnalysisDismissed: () -> Unit = {},
 ) {
@@ -259,7 +297,7 @@ private fun MainShell(
             }
         } else {
             MainTabs(
-                tab, { tab = it }, permissionGranted, onRequestPermission,
+                tab, { tab = it }, permissionGranted, permanentlyDenied, onRequestPermission, onOpenAppSettings,
                 onEntryClick = { logAnalysis = it.toAnalysisArgs() },
                 onSettingsClick = { showSettings = true },
             )
@@ -272,7 +310,9 @@ private fun MainTabs(
     tab: Tab,
     onTabChange: (Tab) -> Unit,
     permissionGranted: Boolean,
+    permanentlyDenied: Boolean,
     onRequestPermission: () -> Unit,
+    onOpenAppSettings: () -> Unit,
     onEntryClick: (DetectionLogEntry) -> Unit,
     onSettingsClick: () -> Unit,
 ) {
@@ -303,7 +343,7 @@ private fun MainTabs(
         val inner = Modifier.fillMaxSize().padding(pad)
         when (tab) {
             Tab.Home -> HomeScreen(
-                inner, permissionGranted, onRequestPermission,
+                inner, permissionGranted, permanentlyDenied, onRequestPermission, onOpenAppSettings,
                 onViewAll = { onTabChange(Tab.Logs) },
                 onEntryClick = onEntryClick,
                 onSettingsClick = onSettingsClick,

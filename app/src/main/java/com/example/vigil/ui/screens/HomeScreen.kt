@@ -20,9 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -56,7 +54,9 @@ private const val COLLAPSED_LOG_COUNT = 8
 fun HomeScreen(
     modifier: Modifier = Modifier,
     permissionGranted: Boolean = true,
+    permanentlyDenied: Boolean = false,
     onRequestPermission: () -> Unit = {},
+    onOpenAppSettings: () -> Unit = {},
     onViewAll: () -> Unit = {},
     onEntryClick: (DetectionLogEntry) -> Unit = {},
     onSettingsClick: () -> Unit = {}
@@ -100,10 +100,10 @@ fun HomeScreen(
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            if (permissionGranted) {
-                "Vigil AI is actively monitoring your texts for potential threats."
-            } else {
-                "Vigil AI needs SMS permission to monitor your device for potential threats."
+            when {
+                permissionGranted -> "Vigil AI is actively monitoring your texts for potential threats."
+                permanentlyDenied -> "SMS permission was denied. Enable it in system settings to resume monitoring."
+                else -> "Vigil AI needs SMS permission to monitor your device for potential threats."
             },
             fontSize = 16.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -114,7 +114,11 @@ fun HomeScreen(
 
         if (!permissionGranted) {
             Spacer(Modifier.height(20.dp))
-            VigilPrimaryButton(text = "Allow Permissions", onClick = onRequestPermission, showArrow = false)
+            if (permanentlyDenied) {
+                VigilPrimaryButton(text = "Open App Settings", onClick = onOpenAppSettings, showArrow = false)
+            } else {
+                VigilPrimaryButton(text = "Allow Permissions", onClick = onRequestPermission, showArrow = false)
+            }
         }
 
         Spacer(Modifier.height(40.dp))
@@ -182,18 +186,12 @@ private fun HomeTopBar(onSettingsClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         VigilWordmark()
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Filled.Notifications, contentDescription = "Notifications", tint = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(Modifier.width(16.dp))
-            Icon(Icons.Filled.AccountCircle, contentDescription = "Profile", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(32.dp))
-            Spacer(Modifier.width(16.dp))
-            Icon(
-                Icons.Filled.Settings,
-                contentDescription = "Settings",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.clickable(onClick = onSettingsClick)
-            )
-        }
+        Icon(
+            Icons.Filled.Settings,
+            contentDescription = "Settings",
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.clickable(onClick = onSettingsClick)
+        )
     }
 }
 
