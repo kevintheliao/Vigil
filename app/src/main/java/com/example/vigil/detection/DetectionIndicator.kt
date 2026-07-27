@@ -20,8 +20,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.GppMaybe
 import androidx.compose.material.icons.rounded.HelpOutline
 import androidx.compose.material.icons.rounded.Report
@@ -34,6 +36,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +47,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 private const val EXIT_ANIMATION_MILLIS = 250
 const val DEFAULT_AUTO_DISMISS_MILLIS = 4_000L
@@ -97,6 +101,13 @@ fun DetectionIndicator(
     autoDismissMillis: Long = DEFAULT_AUTO_DISMISS_MILLIS,
 ) {
     var visible by remember(state) { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    suspend fun dismiss() {
+        visible = false
+        delay(EXIT_ANIMATION_MILLIS.toLong())
+        onDismissed()
+    }
 
     LaunchedEffect(state) {
         if (!state.isVisible) {
@@ -105,9 +116,7 @@ fun DetectionIndicator(
         }
         visible = true
         delay(autoDismissMillis)
-        visible = false
-        delay(EXIT_ANIMATION_MILLIS.toLong())
-        onDismissed()
+        dismiss()
     }
 
     Box(modifier = modifier, contentAlignment = Alignment.TopEnd) {
@@ -117,7 +126,9 @@ fun DetectionIndicator(
             exit = fadeOut(tween(EXIT_ANIMATION_MILLIS)) +
                 slideOutVertically(tween(EXIT_ANIMATION_MILLIS)) { -it / 2 },
         ) {
-            DetectionIndicatorChip(state = state, onTap = onTap)
+            //tapping the chip opens analysis; the separate X lets the user acknowledge and
+            //dismiss without being pulled into the app
+            DetectionIndicatorChip(state = state, onTap = onTap, onDismiss = { scope.launch { dismiss() } })
         }
     }
 }
@@ -129,6 +140,7 @@ fun DetectionIndicatorChip(
     onTap: () -> Unit,
     modifier: Modifier = Modifier,
     darkTheme: Boolean = isSystemInDarkTheme(),
+    onDismiss: (() -> Unit)? = null,
 ) {
     val colors = severityColors(state.severity, darkTheme)
     val containerColor = if (darkTheme) Color(0xFF1E2124) else Color.White
@@ -184,6 +196,22 @@ fun DetectionIndicatorChip(
                     color = colors.accent,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
+                )
+            }
+
+            if (onDismiss != null) {
+                Icon(
+                    imageVector = Icons.Rounded.Close,
+                    contentDescription = "Dismiss",
+                    tint = chevronColor,
+                    modifier = Modifier
+                        .size(28.dp)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = onDismiss,
+                        )
+                        .padding(4.dp),
                 )
             }
 
