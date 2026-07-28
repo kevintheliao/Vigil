@@ -7,7 +7,6 @@ import android.provider.Telephony
 import android.telephony.PhoneNumberUtils
 import kotlin.concurrent.thread
 
-// checks every text in the background and shows the chip if it's not safe
 class SmsReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -74,7 +73,7 @@ class SmsReceiver : BroadcastReceiver() {
         private const val THREAD_VIEWED_CHECK_DELAY_MILLIS = 700L
         private const val THREAD_VIEWED_CHECK_WINDOW_MILLIS = 10_000L
 
-        // load once and reuse, model is 67MB so don't reload per text
+        // model is 67MB, don't reload per text
         private fun classifier(context: Context): OnnxMessageClassifier =
             instance ?: synchronized(this) {
                 instance ?: OnnxMessageClassifier(context).also { instance = it }
