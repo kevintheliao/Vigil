@@ -7,7 +7,7 @@ import android.provider.Telephony
 import android.telephony.PhoneNumberUtils
 import kotlin.concurrent.thread
 
-/** Classifies every incoming SMS on a background thread (goAsync) and shows the chip for non-SAFE results. */
+// checks every text in the background and shows the chip if it's not safe
 class SmsReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -25,10 +25,7 @@ class SmsReceiver : BroadcastReceiver() {
                 val result = classifier(appContext).classify(body)
                 if (result.label != MlLabel.SAFE) {
                     DetectionLog.add(appContext, result, body)
-                    //Usage Access users already opted into "chip only while the SMS app is
-                    //foreground" - tighten that to the exact conversation the message landed in,
-                    //so switching to a different thread doesn't still surface the chip. Users
-                    //without Usage Access keep the broader "alerts show everywhere" promise.
+                    // skip chip only if user has Usage Access and is looking at this exact thread
                     val shouldShow = sender == null ||
                         !DetectionOverlayService.hasUsageAccess(appContext) ||
                         isThreadBeingViewed(appContext, sender, body)
@@ -42,13 +39,7 @@ class SmsReceiver : BroadcastReceiver() {
         }
     }
 
-    /**
-     * Proxy for "the user is looking at this exact thread right now": the default SMS app marks
-     * an incoming message read almost immediately when its conversation is on screen. Waits
-     * briefly for that write, then checks whether it landed on the message we just classified.
-     * ponytail: matches on address+body, so two identical-text messages from the same sender
-     * inside the window are indistinguishable; fine for a single-device heuristic.
-     */
+    // checks if the SMS app already marked this message read, meaning user is looking at it now
     private fun isThreadBeingViewed(context: Context, sender: String, body: String): Boolean {
         Thread.sleep(THREAD_VIEWED_CHECK_DELAY_MILLIS)
         val cutoff = System.currentTimeMillis() - THREAD_VIEWED_CHECK_WINDOW_MILLIS
@@ -83,7 +74,7 @@ class SmsReceiver : BroadcastReceiver() {
         private const val THREAD_VIEWED_CHECK_DELAY_MILLIS = 700L
         private const val THREAD_VIEWED_CHECK_WINDOW_MILLIS = 10_000L
 
-        // loaded once and reused across messages - reloading a 67MB model per text would be wasteful
+        // load once and reuse, model is 67MB so don't reload per text
         private fun classifier(context: Context): OnnxMessageClassifier =
             instance ?: synchronized(this) {
                 instance ?: OnnxMessageClassifier(context).also { instance = it }
