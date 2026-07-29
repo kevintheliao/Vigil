@@ -57,7 +57,6 @@ import com.example.vigil.ui.theme.VigilPrimary
 
 private enum class Flow { Welcome, Facts, Overview, Privacy, Permissions, OverlayPermission, UsageAccess, Main }
 
-// Set to true once onboarding testing is done: returning users then skip straight
 private const val ONBOARDING_PERSISTENCE_ENABLED = false
 
 @Composable
@@ -73,7 +72,7 @@ fun VigilApp(
             else Flow.Welcome
         )
     }
-    //chip tap while onboarding is on screen: jump to Main so the analysis can show
+
     LaunchedEffect(analysisArgs) { if (analysisArgs != null) step = Flow.Main }
     var smsPermissionGranted by remember { mutableStateOf(true) }
     var smsRequestedOnce by remember { mutableStateOf(false) }
@@ -89,8 +88,7 @@ fun VigilApp(
         smsRequestedOnce = true
         step = Flow.OverlayPermission
     }
-    //android hides the rationale prompt both before the first ask and after "don't ask again";
-    //smsRequestedOnce disambiguates so we only offer the Settings deep link on real permanent denial
+
     val smsPermanentlyDenied = smsRequestedOnce && !smsPermissionGranted &&
         (context as? Activity)?.let {
             !ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.READ_SMS)
@@ -100,7 +98,6 @@ fun VigilApp(
             Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, "package:${context.packageName}".toUri())
         )
     }
-    // Overlay permission is a Settings toggle, not a dialog: launch Settings, continue on return.
     val overlayPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
@@ -222,7 +219,6 @@ fun VigilApp(
     }
 }
 
-/** Onboarding wrapper: pins the CTA at a fixed height on every step, with an optional [secondary] slot above it. */
 @Composable
 private fun OnboardScaffold(
     buttonText: String,
@@ -258,7 +254,6 @@ private fun MainShell(
     onAnalysisDismissed: () -> Unit = {},
 ) {
     var tab by remember { mutableStateOf(Tab.Home) }
-    //log-row taps open the same screen; chip-tap args (activity intent) take precedence
     var logAnalysis by remember { mutableStateOf<AnalysisArgs?>(null) }
     var showSettings by remember { mutableStateOf(false) }
     val shownAnalysis = analysisArgs ?: logAnalysis
@@ -266,7 +261,6 @@ private fun MainShell(
         logAnalysis = null
         onAnalysisDismissed()
     }
-    //hold the last args so the screen still has content during the exit slide
     var lastAnalysis by remember { mutableStateOf<AnalysisArgs?>(null) }
     if (shownAnalysis != null) {
         lastAnalysis = shownAnalysis

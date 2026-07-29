@@ -64,7 +64,7 @@ import com.example.vigil.ui.theme.VigilPrimaryContainer
 import com.example.vigil.ui.theme.VigilPrimaryFixed
 import kotlinx.coroutines.delay
 
-/** Wordmark: the Vigil logo (shield + name baked in). */
+/** Vigil logo  */
 @Composable
 fun VigilWordmark(modifier: Modifier = Modifier) {
     Image(
@@ -74,7 +74,6 @@ fun VigilWordmark(modifier: Modifier = Modifier) {
     )
 }
 
-/** Circular brand emblem — concentric halo + shield check. */
 @Composable
 fun ShieldEmblem(size: Int = 180, modifier: Modifier = Modifier) {
     Box(
@@ -141,7 +140,6 @@ private val scanDemoScenarios = listOf(
     )
 )
 
-/** Fake messaging-app demo that loops through harassment and phishing scenarios being flagged. */
 @Composable
 fun MessagesScanDemo(modifier: Modifier = Modifier) {
     var scenarioIndex by remember { mutableStateOf(0) }
@@ -217,7 +215,6 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
                     .padding(16.dp)
                     .onGloballyPositioned { containerCoords = it }
             ) {
-                // Keyed on the scenario so old bubbles are discarded, not text-patched mid-exit (used to flash).
                 key(scenarioIndex) {
                     Column(
                         modifier = Modifier.fillMaxSize(),
@@ -326,7 +323,6 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
     }
 }
 
-/** Solid primary button with optional trailing arrow. */
 @Composable
 fun VigilPrimaryButton(
     text: String,
@@ -350,7 +346,6 @@ fun VigilPrimaryButton(
     }
 }
 
-/** Level-1 card: white surface, 1px outline, no shadow. */
 @Composable
 fun VigilCard(
     modifier: Modifier = Modifier,
@@ -367,7 +362,6 @@ fun VigilCard(
     }
 }
 
-/** Feature row: tinted icon tile + title + body. */
 @Composable
 fun FeatureRow(
     icon: ImageVector,

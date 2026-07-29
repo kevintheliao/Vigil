@@ -59,14 +59,12 @@ class DetectionOverlayService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    /** True when the default SMS app is foreground; without Usage Access falls back to true so the chip still shows. */
+    /** True when the default SMS app is foreground. */
     private fun smsAppIsForeground(): Boolean {
         if (!hasUsageAccess(this)) return true
 
         val usageStats = getSystemService(USAGE_STATS_SERVICE) as UsageStatsManager
         val now = System.currentTimeMillis()
-        //long lookback: the user may have been sitting in the SMS app for a while,
-        //so the most recent ACTIVITY_RESUMED event can be old
         val events = usageStats.queryEvents(now - 3_600_000, now)
         var lastForeground: String? = null
         val event = UsageEvents.Event()
@@ -152,7 +150,6 @@ class DetectionOverlayService : Service() {
         super.onDestroy()
     }
 
-    /** Minimal lifecycle + saved-state owner so a ComposeView can live in a window without an Activity. */
     private class OverlayLifecycleOwner : LifecycleOwner, SavedStateRegistryOwner {
         private val lifecycleRegistry = LifecycleRegistry(this)
         private val savedStateRegistryController = SavedStateRegistryController.create(this)

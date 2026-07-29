@@ -49,7 +49,7 @@ import com.example.vigil.ui.theme.VigilTheme
 
 private const val COLLAPSED_LOG_COUNT = 8
 
-/** Home tab — detection status + recent logs. */
+/** Home tab */
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
@@ -157,7 +157,6 @@ internal fun DetectionLogEntry.title(): String = when (label) {
     MlLabel.HARASSMENT -> "Possible harassment"
 }
 
-//same severity rule as SmsReceiver so log rows match their chip's color
 internal fun DetectionLogEntry.severity(): Severity = when {
     label == MlLabel.SAFE -> Severity.SAFE
     confidence >= 0.85f -> Severity.HIGH
