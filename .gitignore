@@ -28,6 +28,11 @@ local.properties
 *.iml
 .DS_Store
 
+# Claude Code local tooling
+.claude/
+.agents/
+skills-lock.json
+
 # CRITICAL: AI Models (They are too heavy for Git)
 *.onnx
 *.tflite
