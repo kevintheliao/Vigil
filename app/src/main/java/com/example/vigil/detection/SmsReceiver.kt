@@ -24,12 +24,13 @@ class SmsReceiver : BroadcastReceiver() {
                 val result = classifier(appContext).classify(body)
                 if (result.label != MlLabel.SAFE) {
                     DetectionLog.add(appContext, result, body)
-                    // skip chip only if user has Usage Access and is looking at this exact thread
-                    val shouldShow = sender == null ||
-                        !DetectionOverlayService.hasUsageAccess(appContext) ||
-                        isThreadBeingViewed(appContext, sender, body)
-                    if (shouldShow) {
-                        DetectionOverlayService.show(appContext, result.toDetectionUiState(body))
+                    val state = result.toDetectionUiState(body)
+                    if (sender != null && DetectionOverlayService.hasUsageAccess(appContext) &&
+                        !isThreadBeingViewed(appContext, sender, body)
+                    ) {
+                        PendingDetections.add(appContext, sender, body, state)
+                    } else {
+                        DetectionOverlayService.show(appContext, state)
                     }
                 }
             } finally {
