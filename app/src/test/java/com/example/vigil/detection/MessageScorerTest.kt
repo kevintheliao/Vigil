@@ -39,4 +39,23 @@ class MessageScorerTest {
         val result = MessageScorer.score("Check this out https://bit.ly/abc123")
         assertEquals(Severity.MEDIUM, result.severity)
     }
+
+    @Test
+    fun romanceScamPattern_isRomanceScamAndHighRisk() {
+        val result = MessageScorer.score(
+            "I've never felt this way before, you're my soulmate. I'm stuck at the airport, " +
+                "I need money to come visit you, please don't tell your friends about us.",
+        )
+        assertEquals(ThreatCategory.ROMANCE_SCAM, result.category)
+        assertEquals(Severity.HIGH, result.severity)
+    }
+
+    @Test
+    fun groomingPattern_isGroomingAndHighRisk() {
+        val result = MessageScorer.score(
+            "Are your parents home? Don't tell your mom about this, it's our secret. Can I meet you somewhere?",
+        )
+        assertEquals(ThreatCategory.GROOMING, result.category)
+        assertEquals(Severity.HIGH, result.severity)
+    }
 }
