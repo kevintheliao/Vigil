@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Sms
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,8 +35,8 @@ fun PermissionsScreen(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        ShieldEmblem(size = 120)
-        Spacer(Modifier.height(16.dp))
+        SettingsToggleDemo(icon = Icons.Filled.Sms, label = "SMS access")
+        Spacer(Modifier.height(20.dp))
         Text(
             "Enable Protection",
             fontSize = 28.sp,
