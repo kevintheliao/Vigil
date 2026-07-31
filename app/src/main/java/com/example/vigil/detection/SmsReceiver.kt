@@ -21,10 +21,12 @@ class SmsReceiver : BroadcastReceiver() {
         val pendingResult = goAsync()
         thread {
             try {
-                val result = classifier(appContext).classify(body)
-                if (result.label != MlLabel.SAFE) {
-                    DetectionLog.add(appContext, result, body)
-                    val state = result.toDetectionUiState(body)
+                val normalized = TextNormalizer.normalize(body)
+                val result = classifier(appContext).classify(normalized)
+                val scored = MessageScorer.score(normalized)
+                if (result.label != MlLabel.SAFE || scored.severity != Severity.SAFE) {
+                    DetectionLog.add(appContext, result.orFallbackTo(scored), body)
+                    val state = buildUiState(result, scored, body)
                     if (sender != null && DetectionOverlayService.hasUsageAccess(appContext) &&
                         !isThreadBeingViewed(appContext, sender, body)
                     ) {
@@ -62,10 +64,42 @@ class SmsReceiver : BroadcastReceiver() {
         return false
     }
 
-    private fun MlClassification.toDetectionUiState(body: String): DetectionUiState {
-        val severity = if (confidence >= 0.85f) Severity.HIGH else Severity.MEDIUM
-        val message = if (label == MlLabel.SCAM) "Possible scam" else "Possible harassment"
-        return DetectionUiState(severity = severity, message = message, riskScore = (confidence * 100).toInt(), body = body)
+    // MessageScorer catches specific templates (romance scam, grooming, obfuscated keywords) the ML model wasn't trained on;
+    // ML result still wins when it fired, since it's the higher-recall general classifier
+    private fun MlClassification.orFallbackTo(scored: ScoreResult): MlClassification {
+        if (label != MlLabel.SAFE) return this
+        val fallbackLabel = if (scored.category == ThreatCategory.HARASSMENT || scored.category == ThreatCategory.GROOMING) {
+            MlLabel.HARASSMENT
+        } else {
+            MlLabel.SCAM
+        }
+        return MlClassification(fallbackLabel, scored.riskScore / 100f)
+    }
+
+    private fun buildUiState(ml: MlClassification, scored: ScoreResult, body: String): DetectionUiState {
+        val mlSeverity = when {
+            ml.label == MlLabel.SAFE -> Severity.SAFE
+            ml.confidence >= 0.85f -> Severity.HIGH
+            else -> Severity.MEDIUM
+        }
+        val severity = if (scored.severity.rank() > mlSeverity.rank()) scored.severity else mlSeverity
+        val message = when {
+            scored.category == ThreatCategory.GROOMING -> "Possible grooming attempt"
+            scored.category == ThreatCategory.ROMANCE_SCAM -> "Possible romance scam"
+            ml.label == MlLabel.SCAM -> "Possible scam"
+            ml.label == MlLabel.HARASSMENT -> "Possible harassment"
+            scored.category == ThreatCategory.HARASSMENT -> "Possible harassment"
+            else -> "Possible scam"
+        }
+        val riskScore = maxOf((ml.confidence * 100).toInt(), scored.riskScore)
+        return DetectionUiState(severity = severity, message = message, riskScore = riskScore, body = body)
+    }
+
+    private fun Severity.rank() = when (this) {
+        Severity.SAFE -> 0
+        Severity.MEDIUM -> 1
+        Severity.HIGH -> 2
+        Severity.UNKNOWN -> -1
     }
 
     companion object {
