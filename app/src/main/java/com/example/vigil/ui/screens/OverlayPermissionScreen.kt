@@ -1,16 +1,12 @@
 package com.example.vigil.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Layers
@@ -25,9 +21,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.vigil.detection.DetectionIndicatorChip
-import com.example.vigil.detection.DetectionUiState
-import com.example.vigil.detection.Severity
 import com.example.vigil.ui.theme.VigilTheme
 
 /** Onboarding step explaining the "Display over other apps" (SYSTEM_ALERT_WINDOW) permission. */
@@ -41,23 +34,7 @@ fun OverlayPermissionScreen(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Live sample of the alert chip so the user sees what this permission enables.
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceContainer, RoundedCornerShape(16.dp))
-                .padding(vertical = 28.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            DetectionIndicatorChip(
-                state = DetectionUiState(
-                    severity = Severity.HIGH,
-                    message = "High risk",
-                    riskScore = 87
-                ),
-                onTap = {}
-            )
-        }
+        SettingsToggleDemo(icon = Icons.Filled.Layers, label = "Allow display over other apps")
         Spacer(Modifier.height(20.dp))
         Text(
             "Alerts Where You Need Them",
