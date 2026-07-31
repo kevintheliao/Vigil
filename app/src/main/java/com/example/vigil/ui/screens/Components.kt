@@ -34,6 +34,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -385,6 +387,68 @@ fun FeatureRow(
                 Spacer(Modifier.height(4.dp))
                 Text(body, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 20.sp)
             }
+        }
+    }
+}
+
+/** Step indicator dots for the onboarding flow. */
+@Composable
+fun OnboardingProgressDots(current: Int, total: Int, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)
+    ) {
+        repeat(total) { index ->
+            Box(
+                Modifier
+                    .size(if (index == current) 8.dp else 6.dp)
+                    .background(
+                        if (index == current) VigilPrimary else MaterialTheme.colorScheme.outlineVariant,
+                        CircleShape
+                    )
+            )
+        }
+    }
+}
+
+/** Looping mock of the Android Settings toggle row, so onboarding shows what "enabling" looks like. */
+@Composable
+fun SettingsToggleDemo(icon: ImageVector, label: String, modifier: Modifier = Modifier) {
+    var checked by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(700)
+        checked = true
+    }
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceContainer, RoundedCornerShape(16.dp))
+            .padding(horizontal = 16.dp, vertical = 20.dp)
+    ) {
+        Text(
+            "Settings",
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(14.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(icon, contentDescription = null, tint = VigilPrimary, modifier = Modifier.size(26.dp))
+            Spacer(Modifier.width(14.dp))
+            Text(
+                label,
+                fontSize = 15.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f)
+            )
+            Switch(
+                checked = checked,
+                onCheckedChange = null,
+                colors = SwitchDefaults.colors(checkedTrackColor = VigilPrimary)
+            )
         }
     }
 }
