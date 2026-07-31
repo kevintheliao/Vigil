@@ -1,7 +1,7 @@
 package com.example.vigil.detection
 
 /** What kind of harm a flagged message appears to be. */
-enum class ThreatCategory { SCAM, HARASSMENT }
+enum class ThreatCategory { SCAM, HARASSMENT, ROMANCE_SCAM, GROOMING }
 
 data class ScoreResult(
     val severity: Severity,
@@ -68,6 +68,58 @@ object MessageScorer {
         Signal(
             "doxxing threat", ThreatCategory.HARASSMENT, 20,
             Regex("(?i)i('ll| will) (post|share|leak) your (address|photos|number)"),
+        ),
+        Signal(
+            "guilt-tripping language", ThreatCategory.HARASSMENT, 15,
+            Regex("(?i)if you (really )?(loved|cared about) me you('d| would)|after everything i('ve| have) done for you"),
+        ),
+        Signal(
+            "self-harm threat to control", ThreatCategory.HARASSMENT, 35,
+            Regex("(?i)i('ll| will) (hurt|kill) myself if you"),
+        ),
+
+        // Romance scam
+        Signal(
+            "declares love implausibly fast", ThreatCategory.ROMANCE_SCAM, 15,
+            Regex("(?i)i('m| am) (already |so )?in love with you|you('re| are) my soulmate|we('re| are) meant to be together"),
+        ),
+        Signal(
+            "long-distance/overseas excuse", ThreatCategory.ROMANCE_SCAM, 15,
+            Regex("(?i)stationed overseas|deployed (in|to|overseas)|working on an oil rig|on a military base"),
+        ),
+        Signal(
+            "travel/customs money request", ThreatCategory.ROMANCE_SCAM, 35,
+            Regex("(?i)customs fee|visa fee|stuck at the airport|need money to (come|visit|see) you|plane ticket money"),
+        ),
+        Signal(
+            "secrecy about the relationship", ThreatCategory.ROMANCE_SCAM, 15,
+            Regex("(?i)don'?t tell (anyone|your friends|your family) about us|keep (this|us) a secret"),
+        ),
+        Signal(
+            "love bombing", ThreatCategory.ROMANCE_SCAM, 10,
+            Regex("(?i)i('ve| have) never felt this way before|you('re| are) perfect for me"),
+        ),
+
+        // Grooming
+        Signal(
+            "secrecy from parents", ThreatCategory.GROOMING, 40,
+            Regex("(?i)don'?t tell your (mom|dad|parents|mother|father)|this (is|has to be) (our|a) secret"),
+        ),
+        Signal(
+            "asks if parents/guardians are around", ThreatCategory.GROOMING, 20,
+            Regex("(?i)are your parents home|are you home alone|is anyone (else )?(there|home) with you"),
+        ),
+        Signal(
+            "in-person meetup request", ThreatCategory.GROOMING, 30,
+            Regex("(?i)can (i|we) meet you (in person|somewhere)|come (meet|see) me alone|meet up without (your|telling) (parents|anyone)"),
+        ),
+        Signal(
+            "requests photos", ThreatCategory.GROOMING, 35,
+            Regex("(?i)send (me )?(a |some )?(pic|pics|picture|pictures|photo|photos) of yourself|send (nudes|a nude)"),
+        ),
+        Signal(
+            "gift or money for meeting", ThreatCategory.GROOMING, 25,
+            Regex("(?i)i('ll| will) (buy|get|give) you (a gift|money|anything) if (you|we)"),
         ),
     )
 
