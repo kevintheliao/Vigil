@@ -126,16 +126,18 @@ fun VigilApp(
             label = "onboarding-transition"
         ) { animatedStep ->
             when (animatedStep) {
-                Flow.Welcome -> OnboardScaffold("Get Started", { step = Flow.Facts }) { WelcomeScreen() }
+                Flow.Welcome -> OnboardScaffold("Get Started", { step = Flow.Facts }, stepIndex = animatedStep.ordinal) { WelcomeScreen() }
                 Flow.Facts -> OnboardScaffold(
                     "Continue",
                     { step = Flow.Overview },
+                    stepIndex = animatedStep.ordinal,
                     secondary = { SafetyFactsSources() }
                 ) { SafetyFactsScreen() }
-                Flow.Overview -> OnboardScaffold("Continue", { step = Flow.Privacy }) { ProtectionOverviewScreen() }
+                Flow.Overview -> OnboardScaffold("Continue", { step = Flow.Privacy }, stepIndex = animatedStep.ordinal) { ProtectionOverviewScreen() }
                 Flow.Privacy -> OnboardScaffold(
                     "Next",
                     { step = Flow.Permissions },
+                    stepIndex = animatedStep.ordinal,
                     secondary = {
                         Text(
                             "By tapping Next, you acknowledge our commitment to your digital sovereignty.",
@@ -148,6 +150,7 @@ fun VigilApp(
                 Flow.Permissions -> OnboardScaffold(
                     "Enable & Continue",
                     { smsPermissionLauncher.launch(arrayOf(Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS)) },
+                    stepIndex = animatedStep.ordinal,
                     secondary = {
                         TextButton(onClick = { showDataDialog = true }) {
                             Text("Learn how we handle data", color = VigilPrimary, fontWeight = FontWeight.SemiBold)
@@ -168,6 +171,7 @@ fun VigilApp(
                             )
                         }
                     },
+                    stepIndex = animatedStep.ordinal,
                     secondary = {
                         TextButton(onClick = { step = Flow.UsageAccess }) {
                             Text("Maybe later", color = VigilPrimary, fontWeight = FontWeight.SemiBold)
@@ -183,6 +187,7 @@ fun VigilApp(
                             usageAccessLauncher.launch(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
                         }
                     },
+                    stepIndex = animatedStep.ordinal,
                     secondary = {
                         TextButton(onClick = completeOnboarding) {
                             Text("Maybe later", color = VigilPrimary, fontWeight = FontWeight.SemiBold)
@@ -223,6 +228,7 @@ fun VigilApp(
 private fun OnboardScaffold(
     buttonText: String,
     onNext: () -> Unit,
+    stepIndex: Int,
     secondary: (@Composable () -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
@@ -239,7 +245,16 @@ private fun OnboardScaffold(
                 VigilPrimaryButton(text = buttonText, onClick = onNext)
             }
         }
-    ) { pad -> Box(Modifier.padding(pad)) { content() } }
+    ) { pad ->
+        Column(Modifier.padding(pad).fillMaxSize()) {
+            OnboardingProgressDots(
+                current = stepIndex,
+                total = Flow.entries.size - 1,
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
+            )
+            Box(Modifier.weight(1f)) { content() }
+        }
+    }
 }
 
 private enum class Tab { Home, Logs, Education }
