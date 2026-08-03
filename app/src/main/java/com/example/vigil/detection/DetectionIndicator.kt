@@ -133,7 +133,6 @@ fun DetectionIndicator(
     }
 }
 
-/** The chip itself, no animation or auto-dismiss, so previews can render every state statically. */
 @Composable
 fun DetectionIndicatorChip(
     state: DetectionUiState,
