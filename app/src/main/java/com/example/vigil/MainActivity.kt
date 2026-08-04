@@ -42,6 +42,7 @@ class MainActivity : ComponentActivity() {
 
     private fun Intent.toAnalysisArgs(): AnalysisArgs? {
         if (!getBooleanExtra(DetectionOverlayService.EXTRA_OPEN_ANALYSIS, false)) return null
+        if (!DetectionOverlayService.consumeToken(getStringExtra(DetectionOverlayService.EXTRA_TOKEN))) return null
         return AnalysisArgs(
             severity = getStringExtra(DetectionOverlayService.EXTRA_SEVERITY)
                 ?.let { runCatching { Severity.valueOf(it) }.getOrNull() }

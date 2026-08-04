@@ -1,6 +1,9 @@
 package com.example.vigil.detection
 
 import android.content.Context
+import android.content.SharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,7 +19,9 @@ data class DetectionLogEntry(
 
 /** Persists recent SMS classifications so Home can show real history instead of placeholders. */
 object DetectionLog {
-    private const val PREFS_NAME = "vigil_prefs"
+    // own file (not shared with OnboardingPrefs) since this one holds real SMS
+    // snippets and needs Keystore-backed encryption at rest
+    private const val PREFS_NAME = "vigil_detection_log_secure"
     private const val KEY_ENTRIES = "detection_log_entries"
     private const val MAX_ENTRIES = 100
 
@@ -52,9 +57,21 @@ object DetectionLog {
         writePrefs(context, emptyList())
     }
 
+    private fun prefs(context: Context): SharedPreferences {
+        val masterKey = MasterKey.Builder(context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
+        return EncryptedSharedPreferences.create(
+            context,
+            PREFS_NAME,
+            masterKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
+        )
+    }
+
     private fun readPrefs(context: Context): List<DetectionLogEntry> {
-        val raw = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .getString(KEY_ENTRIES, null) ?: return emptyList()
+        val raw = prefs(context).getString(KEY_ENTRIES, null) ?: return emptyList()
         val array = JSONArray(raw)
         return List(array.length()) { i ->
             val obj = array.getJSONObject(i)
@@ -78,7 +95,7 @@ object DetectionLog {
                     .put("timestamp", entry.timestampMillis)
             )
         }
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs(context)
             .edit()
             .putString(KEY_ENTRIES, array.toString())
             .apply()

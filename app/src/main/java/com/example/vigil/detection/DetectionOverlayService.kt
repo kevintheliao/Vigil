@@ -121,6 +121,7 @@ class DetectionOverlayService : Service() {
             Intent(this, MainActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                 putExtra(EXTRA_OPEN_ANALYSIS, true)
+                putExtra(EXTRA_TOKEN, issueToken())
                 putExtra(EXTRA_SEVERITY, state?.severity?.name)
                 putExtra(EXTRA_MESSAGE, state?.message)
                 putExtra(EXTRA_BODY, state?.body)
@@ -188,6 +189,23 @@ class DetectionOverlayService : Service() {
 
         /** Set on the MainActivity intent when the user taps the chip. */
         const val EXTRA_OPEN_ANALYSIS = "com.example.vigil.detection.extra.OPEN_ANALYSIS"
+        const val EXTRA_TOKEN = "com.example.vigil.detection.extra.TOKEN"
+
+        // MainActivity is exported (required for the launcher); this in-memory,
+        // one-time token stops other apps from forging an OPEN_ANALYSIS intent to
+        // spoof the verdict screen with their own severity/body text, since only
+        // this process ever knows the current value.
+        @Volatile private var pendingToken: String? = null
+
+        private fun issueToken(): String =
+            java.util.UUID.randomUUID().toString().also { pendingToken = it }
+
+        /** Consumes and validates a token from an incoming intent; one-shot. */
+        fun consumeToken(candidate: String?): Boolean {
+            val expected = pendingToken ?: return false
+            pendingToken = null
+            return candidate == expected
+        }
 
         /** Show (or update) the detection chip for a suspicious message. */
         fun show(context: Context, state: DetectionUiState) {
