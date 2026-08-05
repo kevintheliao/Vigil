@@ -7,7 +7,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -46,13 +45,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import com.vigilapp.vigil.R
@@ -155,10 +148,6 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
         label = "viewport-height"
     )
 
-    var containerCoords by remember { mutableStateOf<LayoutCoordinates?>(null) }
-    var flaggedBubbleCoords by remember { mutableStateOf<LayoutCoordinates?>(null) }
-    var badgeCoords by remember { mutableStateOf<LayoutCoordinates?>(null) }
-
     LaunchedEffect(Unit) {
         var idx = 0
         while (true) {
@@ -166,8 +155,6 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
             val messages = scanDemoScenarios[idx].messages
             revealed = 0
             flagged = false
-            flaggedBubbleCoords = null
-            badgeCoords = null
             delay(500)
             for (i in messages.indices) {
                 delay(750)
@@ -215,7 +202,6 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
                     .fillMaxWidth()
                     .height(viewportHeight)
                     .padding(16.dp)
-                    .onGloballyPositioned { containerCoords = it }
             ) {
                 key(scenarioIndex) {
                     Column(
@@ -231,13 +217,6 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
                                 Column {
                                     Box(
                                         modifier = Modifier
-                                            .then(
-                                                if (isLast) {
-                                                    Modifier.onGloballyPositioned { flaggedBubbleCoords = it }
-                                                } else {
-                                                    Modifier
-                                                }
-                                            )
                                             .background(
                                                 if (isLast && flagged) {
                                                     MaterialTheme.colorScheme.errorContainer
@@ -266,42 +245,6 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
                     }
                 }
 
-                val container = containerCoords
-                val bubble = flaggedBubbleCoords
-                val badge = badgeCoords
-                if (flagged && container?.isAttached == true && bubble?.isAttached == true && badge?.isAttached == true) {
-                    Canvas(Modifier.fillMaxSize()) {
-                        val start = container.localPositionOf(badge, Offset(badge.size.width / 2f, badge.size.height.toFloat()))
-                        val end = container.localPositionOf(bubble, Offset(bubble.size.width.toFloat(), 0f))
-
-                        // Right-angle elbow connector routed down the right margin, clear of the bubbles.
-                        val rightEdge = size.width - 8.dp.toPx()
-                        val cornerX = maxOf(start.x, end.x).coerceAtMost(rightEdge)
-                        val cornerRadius = 10.dp.toPx()
-                            .coerceAtMost(kotlin.math.abs(end.y - start.y) / 2f)
-                            .coerceAtMost(kotlin.math.abs(cornerX - start.x) / 2f)
-                            .coerceAtMost(kotlin.math.abs(cornerX - end.x) / 2f)
-                            .coerceAtLeast(0f)
-
-                        val path = Path().apply {
-                            moveTo(start.x, start.y)
-                            lineTo(cornerX - cornerRadius, start.y)
-                            quadraticTo(cornerX, start.y, cornerX, start.y + cornerRadius * (if (end.y > start.y) 1f else -1f))
-                            lineTo(cornerX, end.y - cornerRadius * (if (end.y > start.y) 1f else -1f))
-                            quadraticTo(cornerX, end.y, cornerX - cornerRadius, end.y)
-                            lineTo(end.x, end.y)
-                        }
-                        drawPath(
-                            path = path,
-                            color = VigilPrimary,
-                            style = Stroke(
-                                width = 3f,
-                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 8f), 0f)
-                            )
-                        )
-                    }
-                }
-
                 Box(Modifier.align(Alignment.TopEnd)) {
                     key(scenarioIndex) {
                         androidx.compose.animation.AnimatedVisibility(
@@ -314,8 +257,7 @@ fun MessagesScanDemo(modifier: Modifier = Modifier) {
                                     message = scenario.resultLabel,
                                     riskScore = riskScore
                                 ),
-                                onTap = {},
-                                modifier = Modifier.onGloballyPositioned { badgeCoords = it }
+                                onTap = {}
                             )
                         }
                     }
