@@ -52,7 +52,7 @@ import com.example.vigil.detection.DetectionLog
 import com.example.vigil.detection.DetectionOverlayService
 import com.example.vigil.ui.theme.VigilPrimary
 
-private fun hasSmsPermission(context: android.content.Context): Boolean =
+internal fun hasSmsPermission(context: android.content.Context): Boolean =
     ContextCompat.checkSelfPermission(context, Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED &&
         ContextCompat.checkSelfPermission(context, Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED
 

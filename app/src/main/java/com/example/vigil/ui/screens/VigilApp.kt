@@ -36,6 +36,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,14 +51,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.vigil.OnboardingPrefs
 import com.example.vigil.detection.DetectionLogEntry
 import com.example.vigil.detection.DetectionOverlayService
 import com.example.vigil.ui.theme.VigilPrimary
 
 private enum class Flow { Welcome, Facts, Overview, Privacy, Permissions, OverlayPermission, UsageAccess, Main }
-
-private const val ONBOARDING_PERSISTENCE_ENABLED = false
 
 @Composable
 fun VigilApp(
@@ -68,14 +70,27 @@ fun VigilApp(
     val context = LocalContext.current
     var step by remember {
         mutableStateOf(
-            if (analysisArgs != null || (ONBOARDING_PERSISTENCE_ENABLED && OnboardingPrefs.isCompleted(context))) Flow.Main
+            if (analysisArgs != null || OnboardingPrefs.isCompleted(context)) Flow.Main
             else Flow.Welcome
         )
     }
 
     LaunchedEffect(analysisArgs) { if (analysisArgs != null) step = Flow.Main }
-    var smsPermissionGranted by remember { mutableStateOf(true) }
+    var smsPermissionGranted by remember { mutableStateOf(hasSmsPermission(context)) }
     var smsRequestedOnce by remember { mutableStateOf(false) }
+
+    // Re-check SMS permission whenever the app resumes, since it can change while onboarding
+    // is skipped on later launches (e.g. granted/revoked from system Settings).
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                smsPermissionGranted = hasSmsPermission(context)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
     var showDataDialog by remember { mutableStateOf(false) }
     val completeOnboarding = {
         OnboardingPrefs.setCompleted(context)
