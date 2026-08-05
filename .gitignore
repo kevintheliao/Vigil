@@ -43,3 +43,7 @@ skills-lock.json
 *secrets.xml
 *keys.properties
 .env
+
+# Local scratch / generated eval output
+/overlay_current_position.png
+/training/safe_false_positives.csv
