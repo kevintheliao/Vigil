@@ -6,6 +6,12 @@ distribute, sublicense, or sell copies of this software or any
 portion of it, in source or binary form, without prior written
 permission from the copyright holder.
 
+Exception: judges, organizers, and evaluators of a hackathon or
+competition this project has been submitted to may clone, build, run,
+and evaluate this software solely for the purpose of judging that
+submission. This exception grants no rights to otherwise use, copy,
+modify, or distribute the software.
+
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
