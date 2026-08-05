@@ -17,7 +17,7 @@ On-device SMS threat detection for Android. Vigil watches incoming text messages
 **Run it**
 
 ```bash
-git clone git@github.com:kevintheliao/Vigil.git
+git clone https://github.com/kevintheliao/Vigil.git
 ```
 
 Open the project in Android Studio, let Gradle sync, and run the `app` configuration on an emulator or device. Or from the command line:
@@ -68,6 +68,8 @@ Welcome → Facts → Overview → Privacy → Permissions → OverlayPermission
 
 Each onboarding step renders inside `OnboardScaffold` (in `VigilApp.kt`), which pins the primary button at a fixed height on every screen and supports an optional `secondary` slot (captions, source citations, "Maybe later" links) directly above the button.
 
+The Education tab is a feed of threat-topic cards (Cyberbullying, Scams & Phishing, Harassment, Abusive Language) that open into a full lesson screen per topic: warning signs, a numbered "If This Happens To You" action plan, cited sources, and a "Get Help" section with tap-to-call/tap-to-text hotlines (Crisis Text Line, 988, RAINN, FTC, etc.). Card → lesson uses `AnimatedContent` slide transitions with a sticky title header.
+
 ## Project structure
 
 ```
@@ -114,6 +116,7 @@ No `INTERNET` permission — the OS itself guarantees no data leaves the device.
 - Run unit tests with `./gradlew testDebugUnitTest`
 - Most screens have `@Preview` composables — use Android Studio's preview pane for quick UI iteration
 - Fact sources on the Facts slide: UNICEF (2019), FTC text-scam loss data (2025 report, 2024 losses), Pew Research Center (2022)
+- Release builds are signed via `signingConfigs.release` in `app/build.gradle.kts`, keyed off `RELEASE_STORE_FILE` / `RELEASE_STORE_PASSWORD` / `RELEASE_KEY_ALIAS` / `RELEASE_KEY_PASSWORD` in a local (gitignored) `local.properties` — no keystore is committed to the repo
 
 ## License
 

@@ -24,9 +24,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -343,7 +343,7 @@ private fun MainTabs(
                 NavigationBarItem(
                     selected = tab == Tab.Education,
                     onClick = { onTabChange(Tab.Education) },
-                    icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Education") },
+                    icon = { Icon(Icons.Filled.School, contentDescription = "Education") },
                     label = { Text("Education") }
                 )
             }
