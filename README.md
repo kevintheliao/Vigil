@@ -45,7 +45,7 @@ The `training/` directory contains the full pipeline: `prepare_data.py` (dataset
 
 - [UCI SMS Spam Collection](https://archive.ics.uci.edu/dataset/228/sms+spam+collection)
 - [Jigsaw Toxic Comment Classification](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge)
-- [SMS Phishing Dataset for Machine Learning and Pattern Recognition](https://data.mendeley.com/datasets/f45bkkt8pr) (Mendeley Data)
+- [SMS Phishing Dataset for Machine Learning and Pattern Recognition](https://data.mendeley.com/datasets/f45bkkt8pr) (Mendeley Data, CC BY 4.0 — Mishra & Soni)
 - [HateXplain](https://github.com/hate-alert/HateXplain) (MIT)
 - [A Comprehensive Dataset for Automated Cyberbullying Detection](https://data.mendeley.com/datasets/wmx9jj2htd/2) (Mendeley Data, CC BY 4.0 — Ejaz, Razi & Choudhury, *Computers in Human Behavior*, 2023)
 
