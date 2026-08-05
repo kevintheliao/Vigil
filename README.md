@@ -6,6 +6,10 @@ On-device SMS threat detection for Android. Vigil watches incoming text messages
   <img src="vigillogo1.png" alt="Vigil logo" width="120" />
 </p>
 
+## Install on your phone
+
+Grab the signed APK from [Releases](https://github.com/kevintheliao/Vigil/releases/latest), open it on your phone, and allow "Install unknown apps" when prompted (no Play Store listing yet). Requires Android 8.0 (API 26) or higher.
+
 ## Getting started
 
 **Requirements**
