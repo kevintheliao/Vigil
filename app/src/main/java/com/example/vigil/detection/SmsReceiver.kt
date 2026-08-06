@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Telephony
 import android.telephony.PhoneNumberUtils
+import android.util.Log
 import kotlin.concurrent.thread
 
 class SmsReceiver : BroadcastReceiver() {
@@ -35,6 +36,8 @@ class SmsReceiver : BroadcastReceiver() {
                         DetectionOverlayService.show(appContext, state)
                     }
                 }
+            } catch (e: Exception) {
+                Log.e("SmsReceiver", "Failed to classify incoming message", e)
             } finally {
                 pendingResult.finish()
             }
