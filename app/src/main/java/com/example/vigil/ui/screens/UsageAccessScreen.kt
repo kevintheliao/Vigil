@@ -10,7 +10,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.NotificationsPaused
 import androidx.compose.material.icons.filled.Sms
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -35,7 +34,7 @@ fun UsageAccessScreen(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        SettingsToggleDemo(icon = Icons.Filled.NotificationsPaused, label = "Usage access")
+        AppPermissionListDemo(label = "Usage access")
         Spacer(Modifier.height(20.dp))
         Text(
             "Alerts Only While Texting",

@@ -11,7 +11,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Sms
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,7 +34,7 @@ fun PermissionsScreen(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        SettingsToggleDemo(icon = Icons.Filled.Sms, label = "SMS access")
+        SmsPermissionDialogDemo()
         Spacer(Modifier.height(20.dp))
         Text(
             "Enable Protection",

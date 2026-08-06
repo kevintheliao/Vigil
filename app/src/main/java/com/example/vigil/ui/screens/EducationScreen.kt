@@ -69,7 +69,6 @@ private data class Hotline(
 
 private data class ThreatTopic(
     val icon: ImageVector,
-    val chip: String,
     val title: String,
     val description: String,
     val example: String,
@@ -87,7 +86,7 @@ private val crisisTextLine = Hotline(
 
 private val topics = listOf(
     ThreatTopic(
-        Icons.Filled.Warning, "Safety Guide", "Cyberbullying",
+        Icons.Filled.Warning, "Cyberbullying",
         "Persistent negative or aggressive interactions targeting an individual via digital platforms.",
         "\"Publicly sharing private photos or making threats in group chats.\"",
         listOf(
@@ -110,7 +109,7 @@ private val topics = listOf(
         )
     ),
     ThreatTopic(
-        Icons.Filled.Warning, "High Alert", "Scams & Phishing",
+        Icons.Filled.Warning, "Scams & Phishing",
         "Deceptive attempts to obtain sensitive information like passwords or credit card details.",
         "\"Urgent emails asking to verify account details via a suspicious link.\"",
         listOf(
@@ -133,7 +132,7 @@ private val topics = listOf(
         )
     ),
     ThreatTopic(
-        Icons.Filled.Warning, "Community Standards", "Harassment",
+        Icons.Filled.Warning, "Harassment",
         "Repeated, uninvited communication that causes distress or creates a hostile environment.",
         "\"Constant unwanted messages despite being asked to stop.\"",
         listOf(
@@ -156,7 +155,7 @@ private val topics = listOf(
         )
     ),
     ThreatTopic(
-        Icons.Filled.Warning, "Ethics", "Abusive Language",
+        Icons.Filled.Warning, "Abusive Language",
         "Use of profanity, hate speech, or derogatory terms intended to demean or dehumanize.",
         "\"Slurs or targeted insults based on identity or characteristics.\"",
         listOf(
@@ -248,18 +247,11 @@ fun EducationScreen(modifier: Modifier = Modifier) {
 private fun ThreatCard(topic: ThreatTopic, onClick: () -> Unit) {
     VigilCard(modifier = Modifier.clickable(onClick = onClick)) {
         Column(Modifier.padding(16.dp)) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Box(
-                    Modifier.size(48.dp).background(VigilPrimaryContainer.copy(alpha = 0.15f), RoundedCornerShape(12.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(topic.icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
-                }
-                Box(
-                    Modifier.background(MaterialTheme.colorScheme.surfaceContainer, RoundedCornerShape(100.dp)).padding(horizontal = 12.dp, vertical = 4.dp)
-                ) {
-                    Text(topic.chip, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
+            Box(
+                Modifier.size(48.dp).background(VigilPrimaryContainer.copy(alpha = 0.15f), RoundedCornerShape(12.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(topic.icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
             }
             Spacer(Modifier.height(12.dp))
             Text(topic.title, fontSize = 20.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)

@@ -34,7 +34,7 @@ fun OverlayPermissionScreen(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        SettingsToggleDemo(icon = Icons.Filled.Layers, label = "Allow display over other apps")
+        AppPermissionListDemo(label = "Display over other apps")
         Spacer(Modifier.height(20.dp))
         Text(
             "Alerts Where You Need Them",
