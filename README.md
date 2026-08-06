@@ -105,7 +105,7 @@ Shared UI pieces live in `ui/screens/Components.kt`: `VigilCard`, `VigilPrimaryB
 | `SYSTEM_ALERT_WINDOW` | Show the detection chip over the messaging app (Settings toggle, walked through in onboarding) |
 | `PACKAGE_USAGE_STATS` | Optional: keep the chip inside the SMS app instead of over every app. Without it, alerts show everywhere |
 
-No `INTERNET` permission — the OS itself guarantees no data leaves the device. See [PRIVACY.md](PRIVACY.md).
+No `INTERNET` permission — the OS itself guarantees no data leaves the device. See the [privacy policy](https://kevintheliao.github.io/Vigil/) ([source](PRIVACY.md)).
 
 ## Tech stack
 
