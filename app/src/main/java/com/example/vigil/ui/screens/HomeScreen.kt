@@ -181,10 +181,9 @@ internal fun DetectionLogEntry.relativeTime(): String =
 private fun HomeTopBar(onSettingsClick: () -> Unit) {
     Row(
         Modifier.fillMaxWidth().padding(top = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        VigilWordmark()
         Icon(
             Icons.Filled.Settings,
             contentDescription = "Settings",

@@ -7,7 +7,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -46,9 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import com.vigilapp.vigil.R
 import com.example.vigil.detection.DetectionIndicatorChip
 import com.example.vigil.detection.DetectionUiState
 import com.example.vigil.detection.Severity
@@ -58,16 +55,6 @@ import com.example.vigil.ui.theme.VigilPrimary
 import com.example.vigil.ui.theme.VigilPrimaryContainer
 import com.example.vigil.ui.theme.VigilPrimaryFixed
 import kotlinx.coroutines.delay
-
-/** Vigil logo  */
-@Composable
-fun VigilWordmark(modifier: Modifier = Modifier) {
-    Image(
-        painter = painterResource(id = R.drawable.vigil_logo),
-        contentDescription = "Vigil",
-        modifier = modifier.size(40.dp)
-    )
-}
 
 @Composable
 fun ShieldEmblem(size: Int = 180, modifier: Modifier = Modifier) {
