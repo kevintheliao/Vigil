@@ -30,10 +30,14 @@ Open the project in Android Studio, let Gradle sync, and run the `app` configura
 ./gradlew installDebug
 ```
 
+**Testing**
+
+Run the app on an emulator, complete onboarding, then in the emulator toolbar click the three-dots icon (Extended Controls) → **Phone** → **SMS** and send yourself a message. Vigil will classify it and, if flagged, float an alert chip over the screen.
+
 ## How detection works
 
 1. `SmsReceiver` catches incoming SMS broadcasts (`RECEIVE_SMS`).
-2. `OnnxMessageClassifier` runs the message through a quantized DistilBERT model (`app/src/main/assets/model_quantized.onnx`, int8, ~67MB) with three labels: **SAFE / SCAM / HARASSMENT**. Tokenization is a from-scratch WordPiece implementation (`WordPieceTokenizer.kt`).
+2. `OnnxMessageClassifier` runs the message through a quantized DistilBERT model (`app/src/main/assets/model_quantized.onnx`, int8, ~67MB) with three labels: **SAFE / SCAM / HARASSMENT**. Tokenization is a from-scratch WordPiece implementation (`WordPieceTokenizer.kt`). Classification failures are caught and logged in `SmsReceiver` so a single bad message can't crash detection.
 3. Threats trigger `DetectionOverlayService`, which floats an alert chip (severity color + confidence %) over the messaging app. With Usage Access granted, the chip only appears while the default SMS app is foreground.
 4. Every classification is recorded in `DetectionLog` (SharedPreferences, last 100 entries) and shown on the Home and Logs tabs.
 
