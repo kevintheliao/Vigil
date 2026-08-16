@@ -18,6 +18,7 @@ local.properties
 *.apk
 *.aar
 *.jar
+!gradle/wrapper/gradle-wrapper.jar
 build/
 /app/build/
 
