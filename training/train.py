@@ -17,11 +17,9 @@ LABELS = ["SAFE", "SCAM", "HARASSMENT"]
 label2id = {label: i for i, label in enumerate(LABELS)}
 id2label = {i: label for i, label in enumerate(LABELS)}
 
-#load and split data
 df = pd.read_csv("data/combined.csv")
 df["label_id"] = df["label"].map(label2id)
 
-#cap dominant SAFE class; SCAM/HARASSMENT kept as-is since they're scarce
 SAFE_CAP = 30000
 safe_rows = df[df["label"] == "SAFE"]
 other_rows = df[df["label"] != "SAFE"]
@@ -33,7 +31,6 @@ train_df, test_df = train_test_split(
     df, test_size=0.2, random_state=42, stratify=df["label_id"]
 )
 
-#class weights
 class_weights = compute_class_weight(
     class_weight="balanced",
     classes=np.array(sorted(label2id.values())),
@@ -41,7 +38,6 @@ class_weights = compute_class_weight(
 )
 class_weights = torch.tensor(class_weights, dtype=torch.float32)
 
-#tokenize without fixed padding; the collator pads each batch to its own longest example
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 def tokenize(batch):
     return tokenizer(batch["text"], truncation=True, max_length=128)
@@ -54,12 +50,10 @@ test_ds = test_ds.map(tokenize, batched=True)
 
 data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
-#model
 model = AutoModelForSequenceClassification.from_pretrained(
     MODEL_NAME, num_labels=len(LABELS), id2label=id2label, label2id=label2id
 )
 
-#Trainer
 class WeightedTrainer(Trainer):
     def compute_loss(self, model, inputs, return_outputs=False, **kwargs):
         labels = inputs.pop("labels")

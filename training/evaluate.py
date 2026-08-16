@@ -13,13 +13,11 @@ from transformers import (
 
 MODEL_DIR = "./model"
 
-#tokenizer, id2label, label2id
 tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR)
 model = AutoModelForSequenceClassification.from_pretrained(MODEL_DIR)
 id2label = model.config.id2label
 label2id = model.config.label2id
 
-#load and split the data
 df = pd.read_csv("data/combined.csv")
 df["label_id"] = df["label"].map(label2id)
 
@@ -34,7 +32,6 @@ _, test_df = train_test_split(
     df, test_size=0.2, random_state=42, stratify=df["label_id"]
 )
 
-#tokenize, truncation
 def tokenize(batch):
     return tokenizer(batch["text"], truncation=True, max_length=128)
 
@@ -43,7 +40,6 @@ test_ds = test_ds.map(tokenize, batched=True)
 
 data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
-#Trainer
 trainer = Trainer(model=model, data_collator=data_collator)
 predictions = trainer.predict(test_ds)
 

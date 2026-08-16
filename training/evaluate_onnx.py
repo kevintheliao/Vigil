@@ -15,7 +15,7 @@ model = ORTModelForSequenceClassification.from_pretrained(MODEL_DIR, file_name="
 id2label = model.config.id2label
 label2id = model.config.label2id
 
-#rebuild the exact same test split used for training/evaluation
+#must match train.py's split exactly
 df = pd.read_csv("data/combined.csv")
 df["label_id"] = df["label"].map(label2id)
 

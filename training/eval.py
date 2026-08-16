@@ -10,7 +10,7 @@ MODEL_DIR = "./model"
 LABELS = ["SAFE", "SCAM", "HARASSMENT"]
 label2id = {label: i for i, label in enumerate(LABELS)}
 
-#reproduce the exact same split train.py used (same seed, same SAFE cap)
+#must match train.py's split exactly (same seed, same SAFE cap)
 df = pd.read_csv("data/combined.csv")
 df["label_id"] = df["label"].map(label2id)
 
@@ -38,7 +38,6 @@ print(classification_report(y_true, y_pred, target_names=LABELS, digits=3))
 print("confusion matrix (rows=true, cols=pred):")
 print(pd.DataFrame(confusion_matrix(y_true, y_pred), index=LABELS, columns=LABELS))
 
-#dump misclassified SAFE texts (true=SAFE, pred!=SAFE) for label-quality inspection
 mis = test_df.reset_index(drop=True).copy()
 mis["pred"] = [LABELS[p] for p in y_pred]
 mis = mis[(mis["label"] == "SAFE") & (mis["pred"] != "SAFE")]
