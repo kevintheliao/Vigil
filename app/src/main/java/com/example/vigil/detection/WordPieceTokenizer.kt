@@ -5,25 +5,28 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 
 /** BERT-style WordPiece tokenizer. */
-class WordPieceTokenizer(context: Context, private val maxSequenceLength: Int = 128) {
+class WordPieceTokenizer internal constructor(
+    private val vocab: Map<String, Long>,
+    private val maxSequenceLength: Int = 128,
+) {
+    constructor(context: Context, maxSequenceLength: Int = 128) : this(loadVocab(context), maxSequenceLength)
 
-    private val vocab: Map<String, Long>
-    private val clsId: Long
-    private val sepId: Long
-    private val unkId: Long
-    private val unkToken = "[UNK]"
+    private val clsId: Long = vocab.getValue("[CLS]")
+    private val sepId: Long = vocab.getValue("[SEP]")
+    private val unkId: Long = vocab.getValue(unkToken)
 
-    init {
-        val map = HashMap<String, Long>()
-        context.assets.open("vocab.txt").use { stream ->
-            BufferedReader(InputStreamReader(stream, Charsets.UTF_8)).forEachLine { line ->
-                if (line.isNotEmpty()) map[line] = map.size.toLong()
+    companion object {
+        private const val unkToken = "[UNK]"
+
+        private fun loadVocab(context: Context): Map<String, Long> {
+            val map = HashMap<String, Long>()
+            context.assets.open("vocab.txt").use { stream ->
+                BufferedReader(InputStreamReader(stream, Charsets.UTF_8)).forEachLine { line ->
+                    if (line.isNotEmpty()) map[line] = map.size.toLong()
+                }
             }
+            return map
         }
-        vocab = map
-        clsId = vocab.getValue("[CLS]")
-        sepId = vocab.getValue("[SEP]")
-        unkId = vocab.getValue(unkToken)
     }
 
     fun tokenize(text: String): Pair<LongArray, LongArray> {
