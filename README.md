@@ -9,7 +9,7 @@ On-device SMS threat detection for Android. Vigil watches incoming text messages
 ## Recognition
 
 - **1st place, ML & AI track** — [Nexora Global Hackathon](https://nexora-global-hackathon.devpost.com/) (2026)
-- **2nd place, Most Impactful Project** — ML Empowerment Build Challenge 2.0 (2026)
+- **2nd place, Most Impactful Project** — [ML Empowerment Build Challenge 2.0](https://ml-empowerment-2.devpost.com/) (2026)
 
 ## Install on your phone
 
