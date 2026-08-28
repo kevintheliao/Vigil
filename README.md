@@ -6,11 +6,6 @@ On-device SMS threat detection for Android. Vigil watches incoming text messages
   <img src="vigillogo1.png" alt="Vigil logo" width="120" />
 </p>
 
-## Recognition
-
-- **1st place, ML & AI track** — [Nexora Global Hackathon](https://nexora-global-hackathon.devpost.com/) (2026)
-- **2nd place, Most Impactful Project** — [ML Empowerment Build Challenge 2.0](https://ml-empowerment-2.devpost.com/) (2026)
-
 ## Install on your phone
 
 Grab the signed APK from [Releases](https://github.com/kevintheliao/Vigil/releases/latest), open it on your phone, and allow "Install unknown apps" when prompted (no Play Store listing yet). Requires Android 8.0 (API 26) or higher.
@@ -130,6 +125,11 @@ No `INTERNET` permission — the OS itself guarantees no data leaves the device.
 - Most screens have `@Preview` composables — use Android Studio's preview pane for quick UI iteration
 - Fact sources on the Facts slide: UNICEF (2019), FTC text-scam loss data (2025 report, 2024 losses), Pew Research Center (2022)
 - Release builds are signed via `signingConfigs.release` in `app/build.gradle.kts`, keyed off `RELEASE_STORE_FILE` / `RELEASE_STORE_PASSWORD` / `RELEASE_KEY_ALIAS` / `RELEASE_KEY_PASSWORD` in a local (gitignored) `local.properties` — no keystore is committed to the repo
+
+## Recognition
+
+- **1st place, ML & AI track** — [Nexora Global Hackathon](https://nexora-global-hackathon.devpost.com/) (2026)
+- **2nd place, Most Impactful Project** — [ML Empowerment Build Challenge 2.0](https://ml-empowerment-2.devpost.com/) (2026)
 
 ## License
 
