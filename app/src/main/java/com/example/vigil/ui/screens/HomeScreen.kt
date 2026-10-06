@@ -22,9 +22,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -57,12 +59,27 @@ fun HomeScreen(
     permanentlyDenied: Boolean = false,
     onRequestPermission: () -> Unit = {},
     onOpenAppSettings: () -> Unit = {},
+    overlayGranted: Boolean = true,
+    usageGranted: Boolean = true,
+    onEnableOverlay: () -> Unit = {},
+    onEnableUsage: () -> Unit = {},
     onViewAll: () -> Unit = {},
     onEntryClick: (DetectionLogEntry) -> Unit = {},
     onSettingsClick: () -> Unit = {}
 ) {
-    val statusTint = if (permissionGranted) VigilPrimary else MaterialTheme.colorScheme.error
-    val haloTint = if (permissionGranted) VigilPrimaryFixed else MaterialTheme.colorScheme.error
+    // SMS off = detection can't run at all. Overlay off = detection runs and logs, but no warning popup is shown.
+    val warningsOff = permissionGranted && !overlayGranted
+    val amber = severityColors(Severity.MEDIUM, isSystemInDarkTheme())
+    val statusTint = when {
+        !permissionGranted -> MaterialTheme.colorScheme.error
+        warningsOff -> amber.accent
+        else -> VigilPrimary
+    }
+    val haloTint = when {
+        !permissionGranted -> MaterialTheme.colorScheme.error
+        warningsOff -> amber.iconBackground
+        else -> VigilPrimaryFixed
+    }
     val context = LocalContext.current
     LaunchedEffect(Unit) { DetectionLog.ensureLoaded(context) }
     val logEntries by DetectionLog.entries.collectAsState()
@@ -84,15 +101,23 @@ fun HomeScreen(
                     Modifier.size(96.dp).background(MaterialTheme.colorScheme.surfaceContainerLowest, RoundedCornerShape(24.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = statusTint, modifier = Modifier.size(48.dp))
+                    Icon(
+                        if (warningsOff) Icons.Filled.Warning else Icons.Filled.CheckCircle,
+                        contentDescription = null, tint = statusTint, modifier = Modifier.size(48.dp)
+                    )
                 }
             }
         }
 
         Spacer(Modifier.height(24.dp))
         Text(
-            if (permissionGranted) "Detection is ready" else "Detection is not ready",
+            when {
+                !permissionGranted -> "Detection is not ready"
+                warningsOff -> "Detection is on, warnings are off"
+                else -> "Detection is ready"
+            },
             fontSize = 32.sp,
+            lineHeight = 38.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.fillMaxWidth(),
@@ -101,6 +126,7 @@ fun HomeScreen(
         Spacer(Modifier.height(8.dp))
         Text(
             when {
+                warningsOff -> "Vigil still scans your texts and saves threats to Logs, but it can't pop up a warning until Display over other apps is on."
                 permissionGranted -> "Vigil AI is actively monitoring your texts for potential threats."
                 permanentlyDenied -> "SMS permission was denied. Enable it in system settings to resume monitoring."
                 else -> "Vigil AI needs SMS permission to monitor your device for potential threats."
@@ -119,6 +145,16 @@ fun HomeScreen(
             } else {
                 VigilPrimaryButton(text = "Allow Permissions", onClick = onRequestPermission, showArrow = false)
             }
+        }
+
+        if (permissionGranted && (!overlayGranted || !usageGranted)) {
+            Spacer(Modifier.height(20.dp))
+            PermissionBanner(
+                overlayMissing = !overlayGranted,
+                usageMissing = !usageGranted,
+                onEnableOverlay = onEnableOverlay,
+                onEnableUsage = onEnableUsage,
+            )
         }
 
         Spacer(Modifier.height(40.dp))
@@ -190,6 +226,53 @@ private fun HomeTopBar(onSettingsClick: () -> Unit) {
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.clickable(onClick = onSettingsClick)
         )
+    }
+}
+
+/** Home banner for the optional permissions: overlay (no popup without it) and usage access (when the popup appears). */
+@Composable
+private fun PermissionBanner(
+    overlayMissing: Boolean,
+    usageMissing: Boolean,
+    onEnableOverlay: () -> Unit,
+    onEnableUsage: () -> Unit,
+) {
+    val colors = severityColors(Severity.MEDIUM, isSystemInDarkTheme())
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .background(colors.iconBackground, RoundedCornerShape(16.dp))
+            .padding(16.dp)
+    ) {
+        if (overlayMissing) {
+            BannerItem(
+                title = "Warning popups are off",
+                body = "Turn on Display over other apps so Vigil can warn you the moment a harmful message arrives.",
+                accent = colors.accent,
+                onClick = onEnableOverlay,
+            )
+        }
+        if (overlayMissing && usageMissing) Spacer(Modifier.height(12.dp))
+        if (usageMissing) {
+            BannerItem(
+                title = "Usage access is off",
+                body = "Optional. With it, Vigil waits and shows the warning when you open the message, instead of popping up over whatever app you are in.",
+                accent = colors.accent,
+                onClick = onEnableUsage,
+            )
+        }
+    }
+}
+
+@Composable
+private fun BannerItem(title: String, body: String, accent: androidx.compose.ui.graphics.Color, onClick: () -> Unit) {
+    Column(Modifier.fillMaxWidth()) {
+        Text(title, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+        Spacer(Modifier.height(4.dp))
+        Text(body, fontSize = 14.sp, lineHeight = 20.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        TextButton(onClick = onClick, modifier = Modifier.align(Alignment.End)) {
+            Text("Turn on", color = accent, fontWeight = FontWeight.SemiBold)
+        }
     }
 }
 

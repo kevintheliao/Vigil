@@ -78,14 +78,18 @@ fun VigilApp(
     LaunchedEffect(analysisArgs) { if (analysisArgs != null) step = Flow.Main }
     var smsPermissionGranted by remember { mutableStateOf(hasSmsPermission(context)) }
     var smsRequestedOnce by remember { mutableStateOf(false) }
+    var overlayGranted by remember { mutableStateOf(Settings.canDrawOverlays(context)) }
+    var usageGranted by remember { mutableStateOf(DetectionOverlayService.hasUsageAccess(context)) }
 
-    // Re-check SMS permission whenever the app resumes, since it can change while onboarding
+    // Re-check permissions whenever the app resumes, since they can change while onboarding
     // is skipped on later launches (e.g. granted/revoked from system Settings).
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 smsPermissionGranted = hasSmsPermission(context)
+                overlayGranted = Settings.canDrawOverlays(context)
+                usageGranted = DetectionOverlayService.hasUsageAccess(context)
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -113,6 +117,12 @@ fun VigilApp(
             Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, "package:${context.packageName}".toUri())
         )
     }
+    val openOverlaySettings = {
+        context.startActivity(
+            Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, "package:${context.packageName}".toUri())
+        )
+    }
+    val openUsageSettings = { context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)) }
     val overlayPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
@@ -214,6 +224,10 @@ fun VigilApp(
                     permanentlyDenied = smsPermanentlyDenied,
                     onRequestPermission = { smsPermissionLauncher.launch(arrayOf(Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS)) },
                     onOpenAppSettings = openAppSettings,
+                    overlayGranted = overlayGranted,
+                    usageGranted = usageGranted,
+                    onEnableOverlay = openOverlaySettings,
+                    onEnableUsage = openUsageSettings,
                     analysisArgs = analysisArgs,
                     onAnalysisDismissed = onAnalysisDismissed,
                 )
@@ -280,6 +294,10 @@ private fun MainShell(
     permanentlyDenied: Boolean,
     onRequestPermission: () -> Unit,
     onOpenAppSettings: () -> Unit,
+    overlayGranted: Boolean,
+    usageGranted: Boolean,
+    onEnableOverlay: () -> Unit,
+    onEnableUsage: () -> Unit,
     analysisArgs: AnalysisArgs? = null,
     onAnalysisDismissed: () -> Unit = {},
 ) {
@@ -322,6 +340,10 @@ private fun MainShell(
         } else {
             MainTabs(
                 tab, { tab = it }, permissionGranted, permanentlyDenied, onRequestPermission, onOpenAppSettings,
+                overlayGranted = overlayGranted,
+                usageGranted = usageGranted,
+                onEnableOverlay = onEnableOverlay,
+                onEnableUsage = onEnableUsage,
                 onEntryClick = { logAnalysis = it.toAnalysisArgs() },
                 onSettingsClick = { showSettings = true },
             )
@@ -337,6 +359,10 @@ private fun MainTabs(
     permanentlyDenied: Boolean,
     onRequestPermission: () -> Unit,
     onOpenAppSettings: () -> Unit,
+    overlayGranted: Boolean,
+    usageGranted: Boolean,
+    onEnableOverlay: () -> Unit,
+    onEnableUsage: () -> Unit,
     onEntryClick: (DetectionLogEntry) -> Unit,
     onSettingsClick: () -> Unit,
 ) {
@@ -368,6 +394,10 @@ private fun MainTabs(
         when (tab) {
             Tab.Home -> HomeScreen(
                 inner, permissionGranted, permanentlyDenied, onRequestPermission, onOpenAppSettings,
+                overlayGranted = overlayGranted,
+                usageGranted = usageGranted,
+                onEnableOverlay = onEnableOverlay,
+                onEnableUsage = onEnableUsage,
                 onViewAll = { onTabChange(Tab.Logs) },
                 onEntryClick = onEntryClick,
                 onSettingsClick = onSettingsClick,
