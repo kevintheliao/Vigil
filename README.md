@@ -129,7 +129,7 @@ No `INTERNET` permission — the OS itself guarantees no data leaves the device.
 ## Recognition
 
 - **1st place, ML & AI track** — [Nexora Global Hackathon](https://nexora-global-hackathon.devpost.com/) (2026)
-- **1st place, App Development** — Reverie Hacks (2026)
+- **1st place, App Development** — [Reverie Hacks](https://reverie-hacks-2026.devpost.com/) (2026)
 - **2nd place, Most Impactful Project** — [ML Empowerment Build Challenge 2.0](https://ml-empowerment-2.devpost.com/) (2026)
 
 ## License
