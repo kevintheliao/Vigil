@@ -123,7 +123,8 @@ object MessageScorer {
         ),
     )
 
-    fun score(text: String): ScoreResult {
+    /** [cutoffScale] stretches the severity cutoffs (see [DetectionSensitivity.scorerScale]); 1 = defaults. */
+    fun score(text: String, cutoffScale: Float = 1f): ScoreResult {
         if (text.isBlank()) {
             return ScoreResult(Severity.UNKNOWN, riskScore = 0, category = null, matchedSignals = emptyList())
         }
@@ -132,8 +133,8 @@ object MessageScorer {
         val matched = signals.filter { it.pattern.containsMatchIn(normalized) }
         val total = matched.sumOf { it.weight }.coerceIn(0, 100)
         val severity = when {
-            total >= 60 -> Severity.HIGH
-            total >= 30 -> Severity.MEDIUM
+            total >= 60 * cutoffScale -> Severity.HIGH
+            total >= 30 * cutoffScale -> Severity.MEDIUM
             else -> Severity.SAFE
         }
         // dominant category = highest single contributor, for mixed matches

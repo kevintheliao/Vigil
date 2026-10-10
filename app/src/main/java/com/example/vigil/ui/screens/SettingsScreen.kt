@@ -32,6 +32,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -50,6 +51,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.example.vigil.detection.DetectionLog
 import com.example.vigil.detection.DetectionOverlayService
+import com.example.vigil.detection.DetectionSensitivity
 import com.example.vigil.ui.theme.VigilPrimary
 
 internal fun hasSmsPermission(context: android.content.Context): Boolean =
@@ -65,6 +67,8 @@ fun SettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     var overlayGranted by remember { mutableStateOf(Settings.canDrawOverlays(context)) }
     var usageGranted by remember { mutableStateOf(DetectionOverlayService.hasUsageAccess(context)) }
     var showClearConfirm by remember { mutableStateOf(false) }
+    //slider shows sensitivity (higher = more alerts); stored as the flag threshold, its inverse
+    var sensitivity by remember { mutableStateOf(1f - DetectionSensitivity.threshold(context)) }
 
     val smsPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -118,6 +122,35 @@ fun SettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 granted = usageGranted,
                 onClick = { systemSettingsLauncher.launch(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)) },
             )
+        }
+
+        Spacer(Modifier.height(24.dp))
+        SectionLabel("Detection")
+        Spacer(Modifier.height(8.dp))
+        VigilCard {
+            Column(Modifier.fillMaxWidth().padding(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Sensitivity", fontSize = 16.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
+                    Text(sensitivityLabel(sensitivity), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = VigilPrimary)
+                }
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    "Higher catches more threats but also flags more harmless messages. Lower shows fewer false alarms but can miss real threats.",
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Slider(
+                    value = sensitivity,
+                    onValueChange = { sensitivity = it },
+                    onValueChangeFinished = { DetectionSensitivity.setThreshold(context, 1f - sensitivity) },
+                    valueRange = DetectionSensitivity.MIN_THRESHOLD..DetectionSensitivity.MAX_THRESHOLD,
+                    steps = 5,
+                )
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("Fewer alerts", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("More alerts", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
         }
 
         Spacer(Modifier.height(24.dp))
@@ -190,6 +223,12 @@ private fun SettingsRow(icon: ImageVector, title: String, granted: Boolean, onCl
             )
         }
     }
+}
+
+private fun sensitivityLabel(sensitivity: Float): String = when {
+    sensitivity < 0.45f -> "Low"
+    sensitivity > 0.55f -> "High"
+    else -> "Balanced"
 }
 
 private fun appVersionName(context: android.content.Context): String =

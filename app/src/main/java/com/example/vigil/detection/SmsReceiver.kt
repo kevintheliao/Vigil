@@ -23,8 +23,9 @@ class SmsReceiver : BroadcastReceiver() {
         thread {
             try {
                 val normalized = TextNormalizer.normalize(body)
-                val result = classifier(appContext).classify(normalized)
-                val scored = MessageScorer.score(normalized)
+                val threshold = DetectionSensitivity.threshold(appContext)
+                val result = classifier(appContext).classify(normalized, threshold)
+                val scored = MessageScorer.score(normalized, DetectionSensitivity.scorerScale(threshold))
                 if (result.label != MlLabel.SAFE || scored.severity != Severity.SAFE) {
                     DetectionLog.add(appContext, result.orFallbackTo(scored), body)
                     val state = buildUiState(result, scored, body)

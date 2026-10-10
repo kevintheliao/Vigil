@@ -10,6 +10,21 @@ enum class MlLabel { SAFE, SCAM, HARASSMENT}
 
 data class MlClassification(val label: MlLabel, val confidence: Float)
 
+/**
+ * probs is [safe, scam, harassment]. Flags the stronger threat class when it beats "safe" by at least
+ * [threshold] of their combined weight. At 0.5 this is plain argmax, so default behavior is unchanged.
+ */
+internal fun decide(probs: FloatArray, threshold: Float): MlClassification {
+    val safe = probs[0]
+    val threatIndex = if (probs[1] >= probs[2]) 1 else 2
+    val threat = probs[threatIndex]
+    val total = threat + safe
+    if (total > 0f && threat / total >= threshold) {
+        return MlClassification(MlLabel.values()[threatIndex], threat)
+    }
+    return MlClassification(MlLabel.SAFE, safe)
+}
+
 /* runs DistilBert SMS classifer fully on device using ONNX Runtime */
 
 class OnnxMessageClassifier(context: Context) : AutoCloseable {
@@ -17,14 +32,12 @@ class OnnxMessageClassifier(context: Context) : AutoCloseable {
     private val session: OrtSession
     private val tokenizer = WordPieceTokenizer(context)
 
-    private val labels = arrayOf(MlLabel.SAFE, MlLabel.SCAM, MlLabel.HARASSMENT)
-
     init {
         val modelBytes = context.assets.open("model_quantized.onnx").use { it.readBytes()}
         session = env.createSession(modelBytes, OrtSession.SessionOptions())
     }
 
-    fun classify(text: String): MlClassification {
+    fun classify(text: String, threshold: Float = DetectionSensitivity.DEFAULT_THRESHOLD): MlClassification {
         val (inputIds, attentionMask) = tokenizer.tokenize(text)
         val shape = longArrayOf(1, inputIds.size.toLong())
 
@@ -38,8 +51,7 @@ class OnnxMessageClassifier(context: Context) : AutoCloseable {
                     @Suppress("UNCHECKED_CAST")
                     val logits = (results[0].value as Array<FloatArray>)[0]
                     val probs = softmax(logits)
-                    val bestIndex = probs.indices.maxByOrNull { probs[it] }!!
-                    return MlClassification(labels[bestIndex], probs[bestIndex])
+                    return decide(probs, threshold)
                 }
             }
         }
