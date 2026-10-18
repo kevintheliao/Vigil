@@ -169,7 +169,10 @@ fun SettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
         FeatureRow(
             Icons.Filled.Lock,
             "Privacy",
-            "Vigil processes every message on-device. Nothing is uploaded, logged remotely, or shared.",
+            "Vigil processes every message on-device. Nothing is uploaded, logged remotely, or shared. Tap to read the full privacy policy.",
+            modifier = Modifier.clickable {
+                context.startActivity(Intent(Intent.ACTION_VIEW, "https://kevintheliao.github.io/Vigil/".toUri()))
+            },
         )
         Spacer(Modifier.height(8.dp))
         Text(

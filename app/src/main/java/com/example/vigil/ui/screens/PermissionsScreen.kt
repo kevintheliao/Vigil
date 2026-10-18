@@ -44,7 +44,7 @@ fun PermissionsScreen(modifier: Modifier = Modifier) {
         )
         Spacer(Modifier.height(12.dp))
         Text(
-            "To detect threats in real-time, Vigil needs permission to monitor your incoming messages. Your data remains private and on-device.",
+            "Vigil needs permission to read your incoming text messages (SMS) so it can scan each one for scams, phishing, and harassment. Scanning happens only on your phone: message content is never sent, shared, or stored off-device. Vigil never sends, deletes, or changes your messages.",
             fontSize = 15.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
