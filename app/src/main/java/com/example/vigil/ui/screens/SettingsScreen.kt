@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Sms
@@ -172,6 +173,15 @@ fun SettingsScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
             "Vigil processes every message on-device. Nothing is uploaded, logged remotely, or shared. Tap to read the full privacy policy.",
             modifier = Modifier.clickable {
                 context.startActivity(Intent(Intent.ACTION_VIEW, "https://kevintheliao.github.io/Vigil/".toUri()))
+            },
+        )
+        Spacer(Modifier.height(8.dp))
+        FeatureRow(
+            Icons.Filled.Info,
+            "Terms of Use",
+            "Vigil is an aid, not a guarantee. It can miss threats or flag safe messages. Tap to read the terms.",
+            modifier = Modifier.clickable {
+                context.startActivity(Intent(Intent.ACTION_VIEW, "https://kevintheliao.github.io/Vigil/terms.html".toUri()))
             },
         )
         Spacer(Modifier.height(8.dp))
