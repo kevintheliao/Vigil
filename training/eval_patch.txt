@@ -1,0 +1,27 @@
+
+#### ./model
+modern SCAM recall, unseen families+frames (662): 0.825
+modern look-alike SAFE flagged (140):            0.364
+old SCAM recall (242):                          0.955
+HARASSMENT recall (1500):                            0.955
+casual NUS SMS flagged (3000):                       0.298
+web-comment SAFE flagged (1500):                     0.263
+spot-check (flag prob): S1.00 S1.00 S0.01 S1.00 S0.01 S0.41 S0.01 S1.00 S0.01 S0.12 S0.79 S0.79 S0.98 S0.98 S0.17 S1.00 H0.98 H0.98 H0.97
+
+#### ./model_v2
+modern SCAM recall, unseen families+frames (662): 0.547
+modern look-alike SAFE flagged (140):            0.293
+old SCAM recall (242):                          0.963
+HARASSMENT recall (1500):                            0.974
+casual NUS SMS flagged (3000):                       0.027
+web-comment SAFE flagged (1500):                     0.349
+spot-check (flag prob): S0.43 S0.04 S0.21 S0.01 S0.02 S0.21 S0.12 S0.88 S0.00 S0.00 S0.00 S0.07 S0.91 S0.65 S0.05 S0.00 H0.98 H0.99 H0.96
+
+#### ./model_v3
+modern SCAM recall, unseen families+frames (662): 0.977
+modern look-alike SAFE flagged (140):            0.171
+old SCAM recall (242):                          0.979
+HARASSMENT recall (1500):                            0.927
+casual NUS SMS flagged (3000):                       0.014
+web-comment SAFE flagged (1500):                     0.186
+spot-check (flag prob): S1.00 S1.00 S1.00 S1.00 S0.04 S1.00 S0.94 S1.00 S0.00 S0.00 S0.00 S0.02 S0.87 S0.22 S0.03 S0.00 H1.00 H1.00 H0.96

@@ -1,12 +1,12 @@
 import glob
 import os
+import sys
 from optimum.onnxruntime import ORTModelForSequenceClassification, ORTQuantizer
 from optimum.onnxruntime.configuration import AutoQuantizationConfig
 from transformers import AutoTokenizer
 
-MODEL_DIR = "./model"
-ONNX_DIR = "./model_onnx"
-QUANTIZED_DIR = "./model_onnx_quantized"
+#optional args: model dir, onnx dir, quantized dir, e.g. python export_onnx.py ./model_v2 ./model_v2_onnx ./model_v2_onnx_quantized
+MODEL_DIR, ONNX_DIR, QUANTIZED_DIR = sys.argv[1:4] if len(sys.argv) == 4 else ("./model", "./model_onnx", "./model_onnx_quantized")
 
 model = ORTModelForSequenceClassification.from_pretrained(MODEL_DIR, export=True)
 model.save_pretrained(ONNX_DIR)

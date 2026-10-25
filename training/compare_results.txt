@@ -1,0 +1,52 @@
+
+################ OLD: ./model
+=== 1) in-distribution test split ===
+              precision    recall  f1-score   support
+
+        SAFE      0.713     0.750     0.731      6000
+        SCAM      0.978     0.938     0.958       242
+  HARASSMENT      0.963     0.956     0.960     41216
+
+    accuracy                          0.930     47458
+   macro avg      0.885     0.882     0.883     47458
+weighted avg      0.932     0.930     0.931     47458
+
+SAFE false-alarm rate (argmax != SAFE): 0.249
+
+=== 2) held-out NUS senders: 7801 casual real SMS, all assumed safe ===
+flagged as anything non-SAFE (argmax): 0.305
+P(HARASSMENT) >= t: 0.1: 0.365  0.3: 0.280  0.5: 0.255  0.7: 0.213  0.9: 0.106
+flagged as SCAM (argmax): 0.050
+
+=== 3) held-out tweets: 8835 rows, 2455 sexism/racism ===
+thr 0.3: FPR 0.449  FNR 0.167
+thr 0.5: FPR 0.416  FNR 0.182
+thr 0.7: FPR 0.343  FNR 0.234
+thr 0.9: FPR 0.263  FNR 0.318
+AUC 0.739
+
+################ NEW: ./model_v2
+=== 1) in-distribution test split ===
+              precision    recall  f1-score   support
+
+        SAFE      0.802     0.649     0.717      6000
+        SCAM      0.991     0.946     0.968       242
+  HARASSMENT      0.950     0.977     0.963     41216
+
+    accuracy                          0.935     47458
+   macro avg      0.915     0.857     0.883     47458
+weighted avg      0.932     0.935     0.932     47458
+
+SAFE false-alarm rate (argmax != SAFE): 0.351
+
+=== 2) held-out NUS senders: 7801 casual real SMS, all assumed safe ===
+flagged as anything non-SAFE (argmax): 0.029
+P(HARASSMENT) >= t: 0.1: 0.046  0.3: 0.031  0.5: 0.029  0.7: 0.023  0.9: 0.012
+flagged as SCAM (argmax): 0.000
+
+=== 3) held-out tweets: 8835 rows, 2455 sexism/racism ===
+thr 0.3: FPR 0.526  FNR 0.128
+thr 0.5: FPR 0.509  FNR 0.134
+thr 0.7: FPR 0.463  FNR 0.159
+thr 0.9: FPR 0.339  FNR 0.241
+AUC 0.756

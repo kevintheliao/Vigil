@@ -25,11 +25,15 @@ safe_rows = df[df["label"] == "SAFE"]
 other_rows = df[df["label"] != "SAFE"]
 if len(safe_rows) > SAFE_CAP:
     safe_rows = safe_rows.sample(n=SAFE_CAP, random_state=42)
+# casual real SMS as SAFE (added after the cap so it is not sampled away); its test split is held out by sender
+nus_train = pd.read_csv("data/nus_safe_train.csv")
+nus_train["label_id"] = label2id["SAFE"]
 df = pd.concat([safe_rows, other_rows], ignore_index=True)
 
 train_df, test_df = train_test_split(
     df, test_size=0.2, random_state=42, stratify=df["label_id"]
 )
+train_df = pd.concat([train_df, nus_train], ignore_index=True)
 
 class_weights = compute_class_weight(
     class_weight="balanced",
@@ -64,7 +68,7 @@ class WeightedTrainer(Trainer):
         return (loss, outputs) if return_outputs else loss
     
 training_args = TrainingArguments(
-    output_dir="./results",
+    output_dir="./results_v2",
     num_train_epochs=3,
     per_device_train_batch_size=16,
     per_device_eval_batch_size=32,
@@ -72,6 +76,7 @@ training_args = TrainingArguments(
     save_strategy="epoch",
     logging_steps=50,
     load_best_model_at_end=True,
+    save_total_limit=2,
 )
 
 trainer = WeightedTrainer(
@@ -82,6 +87,8 @@ trainer = WeightedTrainer(
     data_collator=data_collator,
 )
 
-trainer.train()
-trainer.save_model("./model")
-tokenizer.save_pretrained("./model")
+#resumes from the newest epoch checkpoint if one exists, so a stopped run can be continued the next day
+import glob
+trainer.train(resume_from_checkpoint=bool(glob.glob('./results_v2/checkpoint-*')))
+trainer.save_model("./model_v2")
+tokenizer.save_pretrained("./model_v2")
