@@ -48,3 +48,5 @@ skills-lock.json
 # Local scratch / generated eval output
 /overlay_current_position.png
 /training/safe_false_positives.csv
+# Play Console submission notes (not part of the app)
+PLAY_*.md
