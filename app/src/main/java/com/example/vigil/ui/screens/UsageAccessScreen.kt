@@ -62,7 +62,7 @@ fun UsageAccessScreen(modifier: Modifier = Modifier) {
             FeatureRow(
                 Icons.Filled.Lock,
                 "Private by Design",
-                "Vigil only checks which app is open when a text arrives. Nothing is tracked or stored, and Vigil has no internet access."
+                "Vigil only checks which app is open when a text arrives. Vigil doesn't record which apps you use, and it has no internet access."
             )
         }
     }
